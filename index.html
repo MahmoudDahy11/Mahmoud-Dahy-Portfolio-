@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      Baseline metadata. Per-page metadata is applied at runtime by the useSeo hook,
+      but these defaults are what crawlers and social previews read first, so they are
+      kept accurate and generic rather than empty.
+    -->
+    <title>Portfolio</title>
+    <meta name="description" content="Software developer portfolio: projects, experience, and contact information." />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Portfolio" />
+    <meta property="og:description" content="Software developer portfolio: projects, experience, and contact information." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Portfolio" />
+    <meta name="twitter:description" content="Software developer portfolio: projects, experience, and contact information." />
+
+    <script>
+      // Applied before first paint so the page never flashes the wrong theme.
+      (function () {
+        try {
+          var stored = localStorage.getItem('portfolio-theme')
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          var theme = stored && stored !== 'system' ? stored : prefersDark ? 'dark' : 'light'
+          document.documentElement.classList.toggle('dark', theme === 'dark')
+        } catch (error) {
+          // Private browsing can make localStorage unavailable. The light theme is a
+          // safe default, so the failure is intentionally silent.
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

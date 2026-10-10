@@ -1,0 +1,165 @@
+import { useMemo, useState } from 'react'
+import { BadgeCheck, ExternalLink } from 'lucide-react'
+import { ImageLightbox, type LightboxImage } from '@/components/common/ImageLightbox'
+import { Container, Section } from '@/components/common/Section'
+import { SectionHeading } from '@/components/common/SectionHeading'
+import { QueryState } from '@/components/common/QueryState'
+import { useCertificates } from '@/features/certificates'
+import { usePageSeo } from '@/hooks/useSeo'
+import { imageUrl } from '@/services/mediaUrls'
+import { formatDate } from '@/utils/formatDate'
+
+/** One certificate, with its credential image and verification link. */
+function CertificateCard({
+  certificate,
+  previewIndex,
+  onPreview,
+}: {
+  certificate: {
+    id: string
+    title: string
+    issuer: string | null
+    issuedOn: string | null
+    credentialId: string | null
+    credentialUrl: string | null
+    imagePath: string | null
+  }
+  previewIndex: number | null
+  onPreview: (index: number) => void
+}) {
+  const image = imageUrl(certificate.imagePath)
+  const issued = formatDate(certificate.issuedOn, { year: 'numeric', month: 'long' })
+
+  return (
+    <article className="border-border flex flex-col gap-3 rounded-lg border p-5">
+      {image && previewIndex !== null ? (
+        <button
+          type="button"
+          className="group rounded text-left focus-visible:outline-ring"
+          onClick={() => onPreview(previewIndex)}
+          aria-label={`Preview ${certificate.title} certificate`}
+        >
+          <img
+            src={image}
+            alt={`${certificate.title} certificate`}
+            className="border-border w-full rounded border object-contain transition duration-(--motion-duration) group-hover:brightness-95"
+            loading="lazy"
+          />
+        </button>
+      ) : null}
+
+      <div className="space-y-1">
+        <h2 className="flex items-start gap-2 font-semibold tracking-tight">
+          <BadgeCheck className="text-primary mt-0.5 size-5 shrink-0" aria-hidden="true" />
+          {certificate.title}
+        </h2>
+
+        {certificate.issuer ? (
+          <p className="text-muted-foreground text-sm">{certificate.issuer}</p>
+        ) : null}
+
+        {issued ? <p className="text-muted-foreground text-sm">Issued {issued}</p> : null}
+
+        {certificate.credentialId ? (
+          <p className="text-muted-foreground font-mono text-xs">
+            Credential ID: {certificate.credentialId}
+          </p>
+        ) : null}
+      </div>
+
+      {certificate.credentialUrl ? (
+        <a
+          href={certificate.credentialUrl}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline"
+        >
+          Verify credential
+          <ExternalLink className="size-3.5" aria-hidden="true" />
+          <span className="sr-only">(opens in a new tab)</span>
+        </a>
+      ) : null}
+    </article>
+  )
+}
+
+/** Published certificates, newest first. */
+export default function CertificatesPage() {
+  const certificates = useCertificates()
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null)
+
+  const certificateImages = useMemo<LightboxImage[]>(() => {
+    return (certificates.data ?? []).flatMap((certificate) => {
+      const src = imageUrl(certificate.imagePath)
+      if (!src) return []
+
+      return [
+        {
+          src,
+          alt: `${certificate.title} certificate`,
+          label: certificate.title,
+        },
+      ]
+    })
+  }, [certificates.data])
+
+  const previewIndexesByCertificateId = useMemo(() => {
+    const indexes = new Map<string, number>()
+
+    ;(certificates.data ?? []).forEach((certificate) => {
+      if (!imageUrl(certificate.imagePath)) return
+      indexes.set(certificate.id, indexes.size)
+    })
+
+    return indexes
+  }, [certificates.data])
+
+  usePageSeo({
+    section: 'Certificates',
+    description: 'Professional certifications and credentials.',
+  })
+
+  return (
+    <Section>
+      <Container>
+        <SectionHeading
+          title="Certificates"
+          description="Professional certifications and credentials."
+          headingLevel="h1"
+        />
+
+        <QueryState
+          isLoading={certificates.isLoading}
+          isError={certificates.isError}
+          error={certificates.error}
+          data={certificates.data}
+          skeletonRows={3}
+          emptyTitle="No certificates added yet"
+          emptyDescription="Certificates will appear here once they are published."
+          emptyIcon={BadgeCheck}
+          onRetry={() => void certificates.refetch()}
+        >
+          {(data) => (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {data.map((certificate) => (
+                <CertificateCard
+                  key={certificate.id}
+                  certificate={certificate}
+                  previewIndex={previewIndexesByCertificateId.get(certificate.id) ?? null}
+                  onPreview={setPreviewIndex}
+                />
+              ))}
+            </div>
+          )}
+        </QueryState>
+
+        <ImageLightbox
+          images={certificateImages}
+          currentIndex={previewIndex}
+          onChange={setPreviewIndex}
+          onClose={() => setPreviewIndex(null)}
+        />
+      </Container>
+    </Section>
+  )
+}

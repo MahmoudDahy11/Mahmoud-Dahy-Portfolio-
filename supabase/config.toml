@@ -1,0 +1,7 @@
+# Supabase CLI configuration.
+#
+# `contact-notify` is called by a database trigger through pg_net, which sends no user JWT.
+# The platform check is therefore off for this one function, and the function authorizes
+# the request itself — see the header comment in `supabase/functions/contact-notify/index.ts`.
+[functions.contact-notify]
+verify_jwt = false

@@ -1,0 +1,1 @@
+export { useAboutSections } from './hooks'

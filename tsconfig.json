@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    /*
+     * Path aliases are declared here as well as in tsconfig.app.json.
+     *
+     * tsconfig.app.json is what the compiler actually uses for src/, but tooling that
+     * reads only the root config (including the shadcn CLI) resolves the `@` alias from
+     * here. Without this, tools write files to a literal `@/` directory instead of src/.
+     */
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "files": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
+}
