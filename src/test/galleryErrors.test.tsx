@@ -25,7 +25,9 @@ function buildProject(images: ImageInput[]): ProjectWithRelations {
     isFeatured: false,
     isPublished: true,
     sortOrder: 0,
+    field: 'software',
     createdAt: '2026-10-06T14:41:38Z',
+    updatedAt: '2026-10-06T14:41:38Z',
     technologies: [],
     images: images as unknown as ProjectWithRelations['images'],
   } as unknown as ProjectWithRelations

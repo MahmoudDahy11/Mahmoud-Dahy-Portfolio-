@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { Sparkles } from 'lucide-react'
+import { FieldSelector } from '@/components/common/FieldSelector'
 import { ImageLightbox } from '@/components/common/ImageLightbox'
 import { Container, ProseContainer, Section } from '@/components/common/Section'
 import { SectionHeading } from '@/components/common/SectionHeading'
 import { QueryState } from '@/components/common/QueryState'
 import { ErrorState } from '@/components/common/ErrorState'
+import { FIELD_LABELS, FIELD_OPTIONS, ALL_FIELDS, type FieldFilter } from '@/constants/fields'
 import { useAboutSections } from '@/features/about'
 import { useProfile } from '@/features/profile'
-import { SkillsByCategory, useSkills } from '@/features/skills'
+import { SkillsByCategory, filterSkillsByField, useSkills } from '@/features/skills'
 import { usePageSeo } from '@/hooks/useSeo'
 import { imageUrl } from '@/services/mediaUrls'
 import { toErrorMessage } from '@/lib/errors'
@@ -23,7 +25,27 @@ export default function AboutPage() {
   const sections = useAboutSections()
   const skills = useSkills()
   const [isProfileImagePreviewOpen, setIsProfileImagePreviewOpen] = useState(false)
+  // Which field's skills are shown below. "All" is the default so every skill is visible
+  // until the visitor narrows it down.
+  const [field, setField] = useState<FieldFilter>('all')
   const profileImage = imageUrl(profile.data?.coverPath)
+
+  const allSkills = skills.data ?? []
+
+  /*
+    Only offer a field that actually has skills. A fresh install has none, and showing an
+    ELV button that leads to an empty list would advertise content the owner has not written
+    yet. "All" stays as long as there is anything to show.
+  */
+  const availableFields = FIELD_OPTIONS.filter((option) =>
+    allSkills.some((skill) => skill.field === option),
+  )
+  const filterOptions: FieldFilter[] = [ALL_FIELDS, ...availableFields]
+
+  // If the selected field lost its last skill (or was never offered), fall back to "All"
+  // rather than leaving nothing highlighted.
+  const activeField = filterOptions.includes(field) ? field : ALL_FIELDS
+  const visibleSkills = filterSkillsByField(allSkills, activeField)
 
   usePageSeo({
     section: profile.data?.fullName ? `About ${profile.data.fullName}` : 'About',
@@ -159,15 +181,32 @@ export default function AboutPage() {
             title="Skills"
             description="Tools and technologies I use, grouped by category."
             headingLevel="h2"
-          />
+          >
+            {availableFields.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-muted-foreground text-sm font-medium">Skills field</p>
+                <FieldSelector
+                  value={activeField}
+                  onChange={setField}
+                  includeAll
+                  options={filterOptions}
+                  ariaLabel="Filter skills by field"
+                />
+              </div>
+            ) : null}
+          </SectionHeading>
 
           <QueryState
             isLoading={skills.isLoading}
             isError={skills.isError}
             error={skills.error}
-            data={skills.data}
+            data={visibleSkills}
             skeletonRows={3}
-            emptyTitle="No skills added yet"
+            emptyTitle={
+              activeField === 'all'
+                ? 'No skills added yet'
+                : `No ${FIELD_LABELS[activeField]} skills added yet`
+            }
             emptyDescription="Skills will appear here once they are published."
             emptyIcon={Sparkles}
             onRetry={() => void skills.refetch()}

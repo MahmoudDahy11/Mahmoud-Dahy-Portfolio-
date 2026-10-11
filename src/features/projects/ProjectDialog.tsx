@@ -18,6 +18,7 @@ export const EMPTY_PROJECT: ProjectValues = {
   isFeatured: false,
   isPublished: false,
   sortOrder: 0,
+  field: 'software',
   technologyIds: [],
   gallery: [],
 }
@@ -48,6 +49,7 @@ export function projectToFormValues(project: ProjectWithRelations): ProjectValue
     isFeatured: project.isFeatured ?? false,
     isPublished: project.isPublished ?? false,
     sortOrder: project.sortOrder ?? 0,
+    field: project.field,
     technologyIds: project.technologies.map((technology) => technology.id),
     gallery: (project.images ?? []).map((image) => ({
       path: image.path,

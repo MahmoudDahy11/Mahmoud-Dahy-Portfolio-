@@ -7,7 +7,6 @@ import {
   getAllProjects,
   getProjectBySlug,
   getPublishedProjects,
-  getTechnologyFilters,
   getTechnologies,
   updateProject,
 } from '@/services/projects'
@@ -52,14 +51,6 @@ export function useTechnologies() {
   return useQuery({
     queryKey: queryKeys.technologies.all(),
     queryFn: getTechnologies,
-  })
-}
-
-/** Technologies with a published-project count, for the filter chips. */
-export function useTechnologyFilters() {
-  return useQuery({
-    queryKey: queryKeys.technologies.filters(),
-    queryFn: getTechnologyFilters,
   })
 }
 

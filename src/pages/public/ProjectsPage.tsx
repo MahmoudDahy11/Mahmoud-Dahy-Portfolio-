@@ -2,10 +2,11 @@ import { FolderKanban } from 'lucide-react'
 import { Container, Section } from '@/components/common/Section'
 import { SectionHeading } from '@/components/common/SectionHeading'
 import { QueryState } from '@/components/common/QueryState'
-import { Button } from '@/components/ui/button'
-import { ProjectCard, useProjects, useTechnologyFilters } from '@/features/projects'
+import { FieldSelector } from '@/components/common/FieldSelector'
+import { ProjectCard, useProjects, filterProjectsByField } from '@/features/projects'
+import { FIELD_LABELS, FIELD_OPTIONS, ALL_FIELDS, type FieldFilter } from '@/constants/fields'
 import { usePageSeo } from '@/hooks/useSeo'
-import { useSearchParams } from 'react-router-dom'
+import { useState } from 'react'
 
 /**
  * Projects index: a responsive grid with a technology filter.
@@ -20,34 +21,22 @@ import { useSearchParams } from 'react-router-dom'
  * server-side filter would be the right call if the list ever grew to hundreds.
  */
 export default function ProjectsPage() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const activeTechnology = searchParams.get('tech') ?? ''
+  const [field, setField] = useState<FieldFilter>(ALL_FIELDS)
 
   const projects = useProjects()
-  const technologies = useTechnologyFilters()
+  const allProjects = projects.data ?? []
+
+  const availableFields = FIELD_OPTIONS.filter((option) =>
+    allProjects.some((project) => project.field === option),
+  )
+  const filterOptions: FieldFilter[] = [ALL_FIELDS, ...availableFields]
+  const activeField = filterOptions.includes(field) ? field : ALL_FIELDS
+  const visibleProjects = filterProjectsByField(allProjects, activeField)
 
   usePageSeo({
     section: 'Projects',
     description: 'Selected projects, with the technologies used to build them.',
   })
-
-  const allProjects = projects.data ?? []
-  const visibleProjects = activeTechnology
-    ? allProjects.filter((project) =>
-        project.technologies.some((technology) => technology.slug === activeTechnology),
-      )
-    : allProjects
-
-  function selectTechnology(slug: string) {
-    // Writing the parameter rather than the whole object preserves anything else already
-    // in the query string, and removing it is how "All" is expressed.
-    setSearchParams((current) => {
-      const next = new URLSearchParams(current)
-      if (slug) next.set('tech', slug)
-      else next.delete('tech')
-      return next
-    })
-  }
 
   return (
     <Section>
@@ -63,31 +52,16 @@ export default function ProjectsPage() {
           second query, and hiding it behind the projects' loading state would make the
           controls appear and disappear as projects load.
         */}
-        {technologies.data && technologies.data.length > 0 ? (
-          <div className="mb-8 flex flex-wrap gap-2" role="group" aria-label="Filter projects by technology">
-            <Button
-              size="sm"
-              variant={activeTechnology ? 'outline' : 'default'}
-              onClick={() => selectTechnology('')}
-              aria-pressed={!activeTechnology}
-            >
-              All
-            </Button>
-
-            {technologies.data.map((technology) => (
-              <Button
-                key={technology.slug}
-                size="sm"
-                variant={activeTechnology === technology.slug ? 'default' : 'outline'}
-                onClick={() => selectTechnology(technology.slug)}
-                aria-pressed={activeTechnology === technology.slug}
-              >
-                {technology.name}
-                <span className={activeTechnology === technology.slug ? 'opacity-80' : 'text-muted-foreground'}>
-                  {technology.count}
-                </span>
-              </Button>
-            ))}
+        {availableFields.length > 0 ? (
+          <div className="mb-8 space-y-2">
+            <p className="text-muted-foreground text-sm font-medium">Projects field</p>
+            <FieldSelector
+              value={activeField}
+              onChange={setField}
+              includeAll
+              options={filterOptions}
+              ariaLabel="Filter projects by field"
+            />
           </div>
         ) : null}
 
@@ -103,23 +77,17 @@ export default function ProjectsPage() {
           data={visibleProjects}
           skeletonRows={3}
           emptyTitle={
-            activeTechnology
-              ? 'No projects with that technology'
-              : 'No projects published yet'
+            activeField === 'all'
+              ? 'No projects published yet'
+              : `No ${FIELD_LABELS[activeField]} projects published yet`
           }
           emptyDescription={
-            activeTechnology
-              ? 'Try a different filter, or view all projects.'
-              : 'Published projects will appear here.'
+            activeField === 'all'
+              ? 'Published projects will appear here.'
+              : 'Published projects will appear here for this field.'
           }
           emptyIcon={FolderKanban}
-          emptyAction={
-            activeTechnology ? (
-              <Button size="sm" variant="outline" onClick={() => selectTechnology('')}>
-                View all projects
-              </Button>
-            ) : undefined
-          }
+          emptyAction={undefined}
           onRetry={() => void projects.refetch()}
         >
           {(data) => (

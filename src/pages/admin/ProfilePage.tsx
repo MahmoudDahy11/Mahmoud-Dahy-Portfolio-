@@ -24,6 +24,7 @@ const EMPTY_PROFILE: ProfileValues = {
   avatarPath: '',
   coverPath: '',
   resumePath: '',
+  resumeElvPath: '',
   yearsOfExperience: undefined,
 }
 
@@ -50,6 +51,7 @@ function profileToFormValues(profile: Profile | null): ProfileValues {
     avatarPath: profile.avatarPath ?? '',
     coverPath: profile.coverPath ?? '',
     resumePath: profile.resumePath ?? '',
+    resumeElvPath: profile.resumeElvPath ?? '',
     yearsOfExperience: profile.yearsOfExperience ?? undefined,
   }
 }
@@ -153,6 +155,12 @@ export default function ProfilePage() {
             label="Resume"
             folder={MEDIA_FOLDERS.profile}
             description="Optional. Without one, the hero hides its download button."
+          />
+          <FileUploadField
+            name="resumeElvPath"
+            label="ELV / Light Current resume"
+            folder={MEDIA_FOLDERS.profile}
+            description="Optional. A second CV for the ELV track, managed independently of the one above."
           />
         </FieldGroup>
 

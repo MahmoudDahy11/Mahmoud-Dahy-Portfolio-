@@ -78,3 +78,7 @@ export const SLUG_RULES = {
   maxLength: 80,
   pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
 } as const
+export const FIELD_SELECT_OPTIONS = [
+  { value: 'software', label: 'Software' },
+  { value: 'elv', label: 'ELV' },
+]

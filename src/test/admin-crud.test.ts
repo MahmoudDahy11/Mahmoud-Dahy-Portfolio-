@@ -98,6 +98,7 @@ describe('projectToFormValues', () => {
     isFeatured: false,
     isPublished: true,
     sortOrder: 3,
+    field: 'software',
     images: [{ id: 'i1', path: 'projects/a.png', altText: 'A screenshot' }],
     technologies: [{ id: 't1', name: 'Flutter', slug: 'flutter' }],
   } as unknown as ProjectWithRelations

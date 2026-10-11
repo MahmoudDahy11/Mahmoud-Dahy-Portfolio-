@@ -177,6 +177,7 @@ describe.skipIf(!live || !adminEmail || !adminPassword)('live admin writes', () 
         isFeatured: false,
         isPublished: false,
         sortOrder: 9999,
+        field: 'software',
         technologyIds: [technologyId],
         gallery: [{ path: asset.path, altText: 'Probe gallery image' }],
       }
@@ -281,6 +282,7 @@ describe.skipIf(!live || !adminEmail || !adminPassword)('live admin writes', () 
         isFeatured: true,
         isPublished: true,
         sortOrder: 9999,
+        field: 'software',
         technologyIds: [technologyId],
         gallery: [{ path: asset.path, altText: 'Probe gallery image' }],
       } satisfies ProjectValues)
@@ -319,6 +321,7 @@ describe.skipIf(!live || !adminEmail || !adminPassword)('live admin writes', () 
         isFeatured: false,
         isPublished: true,
         sortOrder: 9999,
+        field: 'software',
         technologyIds: [],
         gallery: [],
       } satisfies ProjectValues)

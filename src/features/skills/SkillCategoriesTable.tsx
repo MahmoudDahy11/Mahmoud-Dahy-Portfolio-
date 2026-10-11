@@ -1,9 +1,11 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Column } from '@/components/common/DataTable'
 import { DataTable, TableEmptyAction } from '@/components/common/DataTable'
+import { FieldSelector } from '@/components/common/FieldSelector'
 import { RowActions } from '@/components/common/RowActions'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { Button } from '@/components/ui/button'
+import { FIELD_LABELS, type FieldOption } from '@/constants/fields'
 import { useCrudDialogs } from '@/hooks/useCrudDialogs'
 import { useAllSkills, useSkillCategories, useSkillCategoryMutations } from '@/features/skills/hooks'
 import { SkillCategoryDialog } from '@/features/skills/SkillCategoryDialog'
@@ -24,7 +26,12 @@ export function SkillCategoriesTable() {
   const dialogs = useCrudDialogs<SkillCategory>()
   const { create, update, remove, isPending } = useSkillCategoryMutations()
 
-  const rows = useMemo(() => categories.data ?? [], [categories.data])
+  const [field, setField] = useState<FieldOption>('software')
+
+  const rows = useMemo(
+    () => (categories.data ?? []).filter((category) => category.field === field),
+    [categories.data, field],
+  )
 
   // Counting here rather than in the table keeps the "used by N skills" wording accurate as
   // soon as a skill is reassigned, because the skills query is refreshed by the same write.
@@ -48,6 +55,13 @@ export function SkillCategoriesTable() {
           <p className="truncate font-medium">{row.original.name}</p>
           <p className="text-muted-foreground truncate text-xs">/{row.original.slug}</p>
         </div>
+      ),
+    },
+    {
+      id: 'field',
+      header: 'Field',
+      cell: ({ row }) => (
+        <span className="text-muted-foreground text-sm">{FIELD_LABELS[row.original.field]}</span>
       ),
     },
     {
@@ -86,6 +100,13 @@ export function SkillCategoriesTable() {
 
   return (
     <>
+      <FieldSelector
+        value={field}
+        onChange={setField}
+        ariaLabel="Filter categories by field"
+        className="mb-4"
+      />
+
       <DataTable
         columns={columns}
         data={rows}
@@ -94,10 +115,10 @@ export function SkillCategoriesTable() {
         isLoading={categories.isPending}
         error={categories.error}
         onRetry={() => void categories.refetch()}
-        emptyTitle="No categories yet"
+        emptyTitle={`No ${FIELD_LABELS[field]} categories yet`}
         emptyDescription="Categories become the headings on the public skills section. A skill with no category is still shown, under “Other”."
         emptyAction={<TableEmptyAction onClick={dialogs.openCreate} label="Add a category" />}
-        hideBelow={{ sortOrder: 'md' }}
+        hideBelow={{ field: 'sm', sortOrder: 'md' }}
       />
 
       <div className="mt-4">
@@ -115,6 +136,7 @@ export function SkillCategoriesTable() {
           }
         }}
         category={dialogs.editing}
+        defaultField={field}
         isSubmitting={isPending}
         onSubmit={async (values) => {
           if (dialogs.editing) {

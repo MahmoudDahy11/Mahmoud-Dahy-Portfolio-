@@ -74,8 +74,17 @@ async function readUsageSources(): Promise<UsageSource[]> {
     socialLinks,
     settings,
   ] = await Promise.all([
-    fetchJoined<{ avatarPath: string | null; coverPath: string | null; resumePath: string | null }>(
-      () => client.from('profile').select('avatar_path, cover_path, resume_path').limit(1),
+    fetchJoined<{
+      avatarPath: string | null
+      coverPath: string | null
+      resumePath: string | null
+      resumeElvPath: string | null
+    }>(
+      () =>
+        client
+          .from('profile')
+          .select('avatar_path, cover_path, resume_path, resume_elv_path')
+          .limit(1),
       'Could not read profile media references.',
     ),
     fetchJoined<{ imagePath: string | null; title: string }>(
@@ -124,7 +133,12 @@ async function readUsageSources(): Promise<UsageSource[]> {
     ),
   ])
 
-  const singles = profile[0] ?? { avatarPath: null, coverPath: null, resumePath: null }
+  const singles = profile[0] ?? {
+    avatarPath: null,
+    coverPath: null,
+    resumePath: null,
+    resumeElvPath: null,
+  }
   const media = STORAGE_BUCKETS.media
 
   return [
@@ -199,11 +213,14 @@ async function readUsageSources(): Promise<UsageSource[]> {
         socialLinks.map((row) => ({ path: row.iconPath, label: `Social link: ${row.label}` })),
       ),
     },
-    // The résumé is the one reference that lives in the files bucket.
+    // The résumés are the references that live in the files bucket.
     {
       bucket: STORAGE_BUCKETS.files,
       section: ADMIN_ROUTES.profile,
-      rows: nonEmpty([{ path: singles.resumePath, label: 'Profile résumé' }]),
+      rows: nonEmpty([
+        { path: singles.resumePath, label: 'Profile résumé' },
+        { path: singles.resumeElvPath, label: 'Profile ELV résumé' },
+      ]),
     },
     {
       bucket: media,

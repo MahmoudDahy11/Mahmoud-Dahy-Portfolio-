@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { VALIDATION_LIMITS } from '@/constants/validation'
+import { FIELD_OPTIONS } from '@/constants/fields'
 import { optionalDate, optionalText, optionalUrl, requiredText, sortOrderField } from './fields'
 
 /**
@@ -18,6 +19,7 @@ export const certificateSchema = z.object({
   imagePath: optionalText(VALIDATION_LIMITS.url.max, 'Image'),
   sortOrder: sortOrderField,
   isPublished: z.boolean(),
+  field: z.enum(FIELD_OPTIONS),
 })
 
 export type CertificateValues = z.infer<typeof certificateSchema>

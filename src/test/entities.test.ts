@@ -17,6 +17,7 @@ describe('entity types', () => {
     expectTypeOf<Profile>().toHaveProperty('shortBio')
     expectTypeOf<Profile>().toHaveProperty('yearsOfExperience')
     expectTypeOf<Profile>().toHaveProperty('resumePath')
+    expectTypeOf<Profile>().toHaveProperty('resumeElvPath')
     expectTypeOf<Profile>().not.toHaveProperty('full_name')
     expectTypeOf<Profile>().not.toHaveProperty('years_of_experience')
   })

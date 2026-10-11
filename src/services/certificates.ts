@@ -1,10 +1,15 @@
 import { fetchOneOrThrow, fetchRows, getSupabaseClient, toDatabaseRow } from './base'
+import { toFieldOption } from '@/utils/toFieldOption'
 import type { CertificateValues } from '@/schemas/certificate'
-import type { Certificate } from '@/types/entities'
+import type { Certificate, Row } from '@/types/entities'
+
+function toCertificate(row: Row<'certificates'>): Certificate {
+  return { ...row, field: toFieldOption(row.field) }
+}
 
 /** Published certificates, newest first. */
 export async function getCertificates(): Promise<Certificate[]> {
-  return fetchRows<'certificates'>(
+  const rows = await fetchRows<'certificates'>(
     () =>
       getSupabaseClient()
         .from('certificates')
@@ -14,11 +19,12 @@ export async function getCertificates(): Promise<Certificate[]> {
         .order('issued_on', { ascending: false, nullsFirst: false }),
     'Could not load the certificates.',
   )
+  return rows.map(toCertificate)
 }
 
 /** Every certificate, including drafts, for the admin table. */
 export async function getAllCertificates(): Promise<Certificate[]> {
-  return fetchRows<'certificates'>(
+  const rows = await fetchRows<'certificates'>(
     () =>
       getSupabaseClient()
         .from('certificates')
@@ -27,10 +33,11 @@ export async function getAllCertificates(): Promise<Certificate[]> {
         .order('issued_on', { ascending: false, nullsFirst: false }),
     'Could not load the certificates.',
   )
+  return rows.map(toCertificate)
 }
 
-export function createCertificate(values: CertificateValues): Promise<Certificate> {
-  return fetchOneOrThrow<'certificates'>(
+export async function createCertificate(values: CertificateValues): Promise<Certificate> {
+  const row = await fetchOneOrThrow<'certificates'>(
     () =>
       getSupabaseClient()
         .from('certificates')
@@ -39,10 +46,11 @@ export function createCertificate(values: CertificateValues): Promise<Certificat
         .limit(1),
     'Could not save the certificate.',
   )
+  return toCertificate(row)
 }
 
-export function updateCertificate(id: string, values: CertificateValues): Promise<Certificate> {
-  return fetchOneOrThrow<'certificates'>(
+export async function updateCertificate(id: string, values: CertificateValues): Promise<Certificate> {
+  const row = await fetchOneOrThrow<'certificates'>(
     () =>
       getSupabaseClient()
         .from('certificates')
@@ -52,6 +60,7 @@ export function updateCertificate(id: string, values: CertificateValues): Promis
         .limit(1),
     'Could not save the certificate.',
   )
+  return toCertificate(row)
 }
 
 export async function deleteCertificate(id: string): Promise<void> {

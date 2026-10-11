@@ -7,6 +7,8 @@ import {
   optionalNumberField,
   profileSchema,
   siteSettingsSchema,
+  skillCategorySchema,
+  skillSchema,
 } from '@/schemas'
 
 describe('loginSchema', () => {
@@ -79,6 +81,7 @@ describe('profileSchema', () => {
       avatarPath: 'profile/me-1a2b3c4d.png',
       coverPath: 'profile/cover-9f8e7d6c.jpg',
       resumePath: 'profile/cv-5f4e3d2c.pdf',
+      resumeElvPath: 'profile/elv-cv-1f2e3d4c.pdf',
     })
 
     expect(result.success).toBe(true)
@@ -226,6 +229,7 @@ describe('certificateSchema', () => {
     imagePath: '',
     sortOrder: 0,
     isPublished: false,
+    field: 'software',
   }
 
   it('accepts a certificate with neither a badge nor a credential link', () => {
@@ -239,6 +243,47 @@ describe('certificateSchema', () => {
   it('rejects a credential URL that is not absolute, so a typo cannot become a dead link', () => {
     const result = certificateSchema.safeParse({ ...valid, credentialUrl: 'example.com/verify' })
     expect(result.success).toBe(false)
+  })
+})
+
+describe('skillSchema', () => {
+  const valid = {
+    name: 'CCTV',
+    field: 'elv',
+    categoryId: '',
+    proficiency: undefined,
+    iconPath: '',
+    sortOrder: 0,
+    isPublished: false,
+  }
+
+  it('accepts a skill in either field', () => {
+    expect(skillSchema.safeParse({ ...valid, field: 'software' }).success).toBe(true)
+    expect(skillSchema.safeParse({ ...valid, field: 'elv' }).success).toBe(true)
+  })
+
+  it('requires a field, because every skill is shown under exactly one', () => {
+    const withoutField: Record<string, unknown> = { ...valid }
+    delete withoutField.field
+
+    expect(skillSchema.safeParse(withoutField).success).toBe(false)
+  })
+
+  it('rejects a field the database check constraint would refuse', () => {
+    expect(skillSchema.safeParse({ ...valid, field: 'mechanical' }).success).toBe(false)
+  })
+})
+
+describe('skillCategorySchema', () => {
+  const valid = { name: 'Security Systems', field: 'elv', slug: 'security-systems', sortOrder: 0 }
+
+  it('accepts a category in either field', () => {
+    expect(skillCategorySchema.safeParse(valid).success).toBe(true)
+    expect(skillCategorySchema.safeParse({ ...valid, field: 'software' }).success).toBe(true)
+  })
+
+  it('rejects a field the database check constraint would refuse', () => {
+    expect(skillCategorySchema.safeParse({ ...valid, field: 'mechanical' }).success).toBe(false)
   })
 })
 

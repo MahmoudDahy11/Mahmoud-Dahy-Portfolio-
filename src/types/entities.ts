@@ -16,6 +16,7 @@
  */
 import type { Tables, TablesInsert, TablesUpdate } from './database'
 import type { ThemeOption } from '@/constants/validation'
+import type { FieldOption } from '@/constants/fields'
 import type { StorageBucket } from '@/constants/storage'
 
 /** Supabase returns dates as ISO strings; this names that fact explicitly. */
@@ -91,14 +92,22 @@ export type AboutSection = Row<'about_sections'>
 
 // Skills and the technology catalogue they draw from.
 
-export type SkillCategory = Row<'skill_categories'>
-export type Skill = Row<'skills'>
+/**
+ * `field` is narrowed from the generated `string`.
+ *
+ * Postgres types the column as `text` with a CHECK listing the two legal values, so the
+ * generated type cannot know them. Overriding it here is what lets the UI treat a stored
+ * value as a `FieldOption` and what would catch a bad value arriving from the database as a
+ * type error.
+ */
+export type SkillCategory = Omit<Row<'skill_categories'>, 'field'> & { field: FieldOption }
+export type Skill = Omit<Row<'skills'>, 'field'> & { field: FieldOption }
 export type Technology = Row<'technologies'>
 
 // Projects, with their images and technology links. The link tables are join rows, so
 // they carry no id of their own and are never rendered directly.
 
-export type Project = Row<'projects'>
+export type Project = Omit<Row<'projects'>, 'field'> & { field: FieldOption }
 export type ProjectImage = Row<'project_images'>
 export type ProjectTechnology = Row<'project_technologies'>
 
@@ -110,9 +119,9 @@ export type ProjectWithRelations = Project & {
 
 // Career history.
 
-export type Experience = Row<'experiences'>
+export type Experience = Omit<Row<'experiences'>, 'field'> & { field: FieldOption }
 export type Education = Row<'educations'>
-export type Certificate = Row<'certificates'>
+export type Certificate = Omit<Row<'certificates'>, 'field'> & { field: FieldOption }
 export type Service = Row<'services'>
 export type SocialLink = Row<'social_links'>
 

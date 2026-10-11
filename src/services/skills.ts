@@ -1,6 +1,7 @@
 import { fetchOneOrThrow, fetchRows, getSupabaseClient, toDatabaseRow } from './base'
+import { toFieldOption } from '@/utils/toFieldOption'
 import type { SkillCategoryValues, SkillValues } from '@/schemas/skills'
-import type { Skill, SkillCategory } from '@/types/entities'
+import type { Row, Skill, SkillCategory } from '@/types/entities'
 
 /**
  * A skill with its category resolved.
@@ -12,6 +13,31 @@ import type { Skill, SkillCategory } from '@/types/entities'
  */
 export type SkillWithCategory = Skill & {
   skillCategories: Pick<SkillCategory, 'id' | 'name' | 'slug' | 'sortOrder'> | null
+}
+
+/** A joined skill row as it comes back, before `field` is narrowed. */
+type RawSkillWithCategory = Row<'skills'> & {
+  skillCategories: Pick<SkillCategory, 'id' | 'name' | 'slug' | 'sortOrder'> | null
+}
+
+/**
+ * Narrows `field` on a joined skill row.
+ *
+ * The value arrives as `string`; `toFieldOption` turns it into a `FieldOption`, the same
+ * conversion `getSiteSettings` makes for `defaultTheme`.
+ */
+function toSkillWithCategory(row: RawSkillWithCategory): SkillWithCategory {
+  return { ...row, field: toFieldOption(row.field) }
+}
+
+/** Narrows `field` on a plain skill row. */
+function toSkill(row: Row<'skills'>): Skill {
+  return { ...row, field: toFieldOption(row.field) }
+}
+
+/** Narrows `field` on a category row. */
+function toSkillCategory(row: Row<'skill_categories'>): SkillCategory {
+  return { ...row, field: toFieldOption(row.field) }
 }
 
 /**
@@ -39,12 +65,12 @@ export async function getSkills(): Promise<SkillWithCategory[]> {
     'Could not load the skills.',
   )
 
-  return rows as SkillWithCategory[]
+  return (rows as RawSkillWithCategory[]).map(toSkillWithCategory)
 }
 
 /** Categories in owner-defined order. Used for grouping and for the admin form. */
 export async function getSkillCategories(): Promise<SkillCategory[]> {
-  return fetchRows<'skill_categories'>(
+  const rows = await fetchRows<'skill_categories'>(
     () =>
       getSupabaseClient()
         .from('skill_categories')
@@ -53,6 +79,8 @@ export async function getSkillCategories(): Promise<SkillCategory[]> {
         .order('name', { ascending: true }),
     'Could not load the skill categories.',
   )
+
+  return rows.map(toSkillCategory)
 }
 
 /**
@@ -72,26 +100,30 @@ export async function getAllSkills(): Promise<SkillWithCategory[]> {
     'Could not load the skills.',
   )
 
-  return rows as SkillWithCategory[]
+  return (rows as RawSkillWithCategory[]).map(toSkillWithCategory)
 }
 
-export function createSkill(values: SkillValues): Promise<Skill> {
-  return fetchOneOrThrow<'skills'>(
-    () => getSupabaseClient().from('skills').insert(toDatabaseRow<'skills'>(values)).select().limit(1),
-    'Could not save the skill.',
+export async function createSkill(values: SkillValues): Promise<Skill> {
+  return toSkill(
+    await fetchOneOrThrow<'skills'>(
+      () => getSupabaseClient().from('skills').insert(toDatabaseRow<'skills'>(values)).select().limit(1),
+      'Could not save the skill.',
+    ),
   )
 }
 
-export function updateSkill(id: string, values: SkillValues): Promise<Skill> {
-  return fetchOneOrThrow<'skills'>(
-    () =>
-      getSupabaseClient()
-        .from('skills')
-        .update(toDatabaseRow<'skills'>(values))
-        .eq('id', id)
-        .select()
-        .limit(1),
-    'Could not save the skill.',
+export async function updateSkill(id: string, values: SkillValues): Promise<Skill> {
+  return toSkill(
+    await fetchOneOrThrow<'skills'>(
+      () =>
+        getSupabaseClient()
+          .from('skills')
+          .update(toDatabaseRow<'skills'>(values))
+          .eq('id', id)
+          .select()
+          .limit(1),
+      'Could not save the skill.',
+    ),
   )
 }
 
@@ -107,28 +139,35 @@ export async function deleteSkill(id: string): Promise<void> {
   )
 }
 
-export function createSkillCategory(values: SkillCategoryValues): Promise<SkillCategory> {
-  return fetchOneOrThrow<'skill_categories'>(
-    () =>
-      getSupabaseClient()
-        .from('skill_categories')
-        .insert(toDatabaseRow<'skill_categories'>(values))
-        .select()
-        .limit(1),
-    'Could not save the category.',
+export async function createSkillCategory(values: SkillCategoryValues): Promise<SkillCategory> {
+  return toSkillCategory(
+    await fetchOneOrThrow<'skill_categories'>(
+      () =>
+        getSupabaseClient()
+          .from('skill_categories')
+          .insert(toDatabaseRow<'skill_categories'>(values))
+          .select()
+          .limit(1),
+      'Could not save the category.',
+    ),
   )
 }
 
-export function updateSkillCategory(id: string, values: SkillCategoryValues): Promise<SkillCategory> {
-  return fetchOneOrThrow<'skill_categories'>(
-    () =>
-      getSupabaseClient()
-        .from('skill_categories')
-        .update(toDatabaseRow<'skill_categories'>(values))
-        .eq('id', id)
-        .select()
-        .limit(1),
-    'Could not save the category.',
+export async function updateSkillCategory(
+  id: string,
+  values: SkillCategoryValues,
+): Promise<SkillCategory> {
+  return toSkillCategory(
+    await fetchOneOrThrow<'skill_categories'>(
+      () =>
+        getSupabaseClient()
+          .from('skill_categories')
+          .update(toDatabaseRow<'skill_categories'>(values))
+          .eq('id', id)
+          .select()
+          .limit(1),
+      'Could not save the category.',
+    ),
   )
 }
 

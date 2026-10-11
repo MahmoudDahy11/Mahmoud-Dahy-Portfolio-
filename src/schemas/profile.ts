@@ -31,6 +31,7 @@ export const profileSchema = z.object({
   avatarPath: storagePathField('Avatar path'),
   coverPath: storagePathField('Cover path'),
   resumePath: storagePathField('Resume path'),
+  resumeElvPath: storagePathField('ELV resume path'),
   // A cleared field is an explicit `null`, which is what actually clears the value in the
   // database. `optionalNumberField` does that conversion; a plain number dropped as
   // `undefined` would leave the old value in place and the save would do nothing.

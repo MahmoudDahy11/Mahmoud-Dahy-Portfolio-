@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { VALIDATION_LIMITS } from '@/constants/validation'
+import { FIELD_OPTIONS } from '@/constants/fields'
 import { optionalNumberField, optionalText, requiredText, slugField, sortOrderField } from './fields'
 
 /**
@@ -16,6 +17,9 @@ import { optionalNumberField, optionalText, requiredText, slugField, sortOrderFi
  */
 export const skillSchema = z.object({
   name: requiredText('Name', VALIDATION_LIMITS.skillName),
+  // The Software / ELV track this skill belongs to. A required choice rather than an
+  // optional one, because every skill is shown under exactly one field on the public site.
+  field: z.enum(FIELD_OPTIONS),
   categoryId: z.string().optional().or(z.literal('')),
   // A cleared rating is an explicit `null`, so "no rating" can actually be restored after
   // a rating was set. `percentageField` dropped a cleared input as `undefined`, which the
@@ -31,6 +35,7 @@ export type SkillValues = z.infer<typeof skillSchema>
 /** A skill category. The slug is unique, so it doubles as a stable identifier. */
 export const skillCategorySchema = z.object({
   name: requiredText('Name', VALIDATION_LIMITS.categoryName),
+  field: z.enum(FIELD_OPTIONS),
   slug: slugField('Slug'),
   sortOrder: sortOrderField,
 })

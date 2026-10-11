@@ -18,6 +18,7 @@ import type { Profile } from '@/types/entities'
  */
 export function Hero({ profile }: { profile: Profile }) {
   const resume = fileUrl(profile.resumePath)
+  const resumeElv = fileUrl(profile.resumeElvPath)
   const avatar = imageUrl(profile.avatarPath)
   const [isAvatarPreviewOpen, setIsAvatarPreviewOpen] = useState(false)
   const settings = useSiteSettings()
@@ -116,11 +117,17 @@ export function Hero({ profile }: { profile: Profile }) {
             Get in touch
           </LinkButton>
 
-          {/* The résumé path comes from the database, so it may be a storage URL or a
-              path; DestinationButton picks the right element rather than assuming. */}
+          {/* Each CV is stored separately, so each button appears only when its own file
+              exists. The Flutter and ELV résumés are managed and downloaded independently. */}
           {resume ? (
             <DestinationButton to={resume} variant="ghost">
-              Résumé
+              Flutter CV
+            </DestinationButton>
+          ) : null}
+
+          {resumeElv ? (
+            <DestinationButton to={resumeElv} variant="ghost">
+              ELV CV
             </DestinationButton>
           ) : null}
         </div>

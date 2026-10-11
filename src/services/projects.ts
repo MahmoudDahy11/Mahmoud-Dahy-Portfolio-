@@ -1,6 +1,8 @@
 import { fetchJoined, fetchOneOrThrow, fetchRows, getSupabaseClient, toDatabaseRow } from './base'
+import { toFieldOption } from '@/utils/toFieldOption'
 import type { Insert } from './base'
 import type { Project, ProjectImage, ProjectWithRelations, Technology } from '@/types/entities'
+import type { Row } from '@/types/entities'
 import type { ProjectValues } from '@/schemas/project'
 
 /**
@@ -30,7 +32,7 @@ const PROJECT_WITH_RELATIONS =
  * assert, because a snake_case key here type-checks perfectly well and resolves to
  * `undefined` at runtime, leaving every project with an empty gallery and no technologies.
  */
-type ProjectRow = Project & {
+type ProjectRow = Row<'projects'> & {
   projectImages: ProjectImage[]
   projectTechnologies: { technology: Technology | null }[]
 }
@@ -40,6 +42,7 @@ function toProjectWithRelations(row: ProjectRow): ProjectWithRelations {
 
   return {
     ...project,
+    field: toFieldOption(project.field),
     images: projectImages ?? [],
     // A link row whose technology is missing is a referential-integrity problem the
     // database should not permit; skipping it keeps a card rendering instead of crashing.
@@ -51,6 +54,10 @@ function toProjectWithRelations(row: ProjectRow): ProjectWithRelations {
 
 function toProjectList(rows: ProjectRow[]): ProjectWithRelations[] {
   return rows.map(toProjectWithRelations)
+}
+
+function toProject(row: Row<'projects'>): Project {
+  return { ...row, field: toFieldOption(row.field) }
 }
 
 /**
@@ -346,7 +353,7 @@ export async function createProject(values: ProjectValues): Promise<Project> {
   await syncTechnologies(project.id, values.technologyIds)
   await syncGallery(project.id, values.gallery)
 
-  return project
+  return toProject(project)
 }
 
 /** Updates a project with its technologies and gallery. */
@@ -367,7 +374,7 @@ export async function updateProject(id: string, values: ProjectValues): Promise<
   await syncTechnologies(id, values.technologyIds)
   await syncGallery(id, values.gallery)
 
-  return project
+  return toProject(project)
 }
 
 /**

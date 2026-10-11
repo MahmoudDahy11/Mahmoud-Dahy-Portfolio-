@@ -1,3 +1,4 @@
+export { filterProjectsByField } from './filter'
 export { ProjectCard } from './ProjectCard'
 export { ProjectDialog, projectToFormValues, EMPTY_PROJECT } from './ProjectDialog'
 export { ProjectForm } from './ProjectForm'
@@ -8,6 +9,5 @@ export {
   useProjectMutations,
   useProjects,
   useTechnologies,
-  useTechnologyFilters,
   useTechnologyMutations,
 } from './hooks'

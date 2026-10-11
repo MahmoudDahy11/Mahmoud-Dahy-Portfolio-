@@ -1,6 +1,7 @@
 import { EntityDialog } from '@/components/common/EntityDialog'
 import { SwitchField, TextAreaField, TextField } from '@/components/common/FormField'
-import { NumberField } from '@/components/common/FormControls'
+import { NumberField, SelectField } from '@/components/common/FormControls'
+import { FIELD_SELECT_OPTIONS } from '@/constants/validation'
 import { experienceSchema, type ExperienceValues } from '@/schemas'
 import type { Experience } from '@/types/entities'
 
@@ -15,6 +16,7 @@ export const EMPTY_EXPERIENCE: ExperienceValues = {
   isCurrent: false,
   sortOrder: 0,
   isPublished: false,
+  field: 'software',
 }
 
 /**
@@ -39,6 +41,7 @@ export function experienceToFormValues(role: Experience | null): ExperienceValue
     isCurrent: role.isCurrent,
     sortOrder: role.sortOrder,
     isPublished: role.isPublished,
+    field: role.field,
   }
 }
 
@@ -102,6 +105,12 @@ export function ExperienceDialog({
             label="End date"
             type="date"
             description="Leave empty for a current role."
+          />
+          <SelectField
+            name="field"
+            label="Field"
+            options={FIELD_SELECT_OPTIONS}
+            description="The Software or ELV track this role belongs to."
           />
           <NumberField name="sortOrder" label="Sort order" min={0} description="Lower appears first." />
         </div>

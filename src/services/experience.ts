@@ -1,6 +1,8 @@
 import { fetchOneOrThrow, fetchRows, getSupabaseClient, toDatabaseRow } from './base'
+import { toFieldOption } from '@/utils/toFieldOption'
 import type { ExperienceValues } from '@/schemas/experience'
 import type { Experience } from '@/types/entities'
+import type { Row } from '@/types/entities'
 
 /**
  * Employment history.
@@ -9,7 +11,7 @@ import type { Experience } from '@/types/entities'
  * convention every CV uses, and the one a visitor scanning the page expects.
  */
 export async function getExperiences(): Promise<Experience[]> {
-  return fetchRows<'experiences'>(
+  const rows = await fetchRows<'experiences'>(
     () =>
       getSupabaseClient()
         .from('experiences')
@@ -19,6 +21,7 @@ export async function getExperiences(): Promise<Experience[]> {
         .order('start_date', { ascending: false }),
     'Could not load the work experience.',
   )
+  return rows.map(toExperience)
 }
 
 /**
@@ -29,7 +32,7 @@ export async function getExperiences(): Promise<Experience[]> {
  * key so saving a draft refreshes the admin table without also refetching the public timeline.
  */
 export async function getAllExperiences(): Promise<Experience[]> {
-  return fetchRows<'experiences'>(
+  const rows = await fetchRows<'experiences'>(
     () =>
       getSupabaseClient()
         .from('experiences')
@@ -38,10 +41,11 @@ export async function getAllExperiences(): Promise<Experience[]> {
         .order('start_date', { ascending: false }),
     'Could not load the work experience.',
   )
+  return rows.map(toExperience)
 }
 
-export function createExperience(values: ExperienceValues): Promise<Experience> {
-  return fetchOneOrThrow<'experiences'>(
+export async function createExperience(values: ExperienceValues): Promise<Experience> {
+  const row = await fetchOneOrThrow<'experiences'>(
     () =>
       getSupabaseClient()
         .from('experiences')
@@ -50,10 +54,11 @@ export function createExperience(values: ExperienceValues): Promise<Experience> 
         .limit(1),
     'Could not save the role.',
   )
+  return toExperience(row)
 }
 
-export function updateExperience(id: string, values: ExperienceValues): Promise<Experience> {
-  return fetchOneOrThrow<'experiences'>(
+export async function updateExperience(id: string, values: ExperienceValues): Promise<Experience> {
+  const row = await fetchOneOrThrow<'experiences'>(
     () =>
       getSupabaseClient()
         .from('experiences')
@@ -63,6 +68,11 @@ export function updateExperience(id: string, values: ExperienceValues): Promise<
         .limit(1),
     'Could not save the role.',
   )
+  return toExperience(row)
+}
+
+function toExperience(row: Row<'experiences'>): Experience {
+  return { ...row, field: toFieldOption(row.field) }
 }
 
 export async function deleteExperience(id: string): Promise<void> {

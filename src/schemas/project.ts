@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { VALIDATION_LIMITS } from '@/constants/validation'
+import { FIELD_OPTIONS } from '@/constants/fields'
 import {
   optionalDate,
   optionalText,
@@ -38,6 +39,7 @@ export const projectSchema = z.object({
   isFeatured: z.boolean(),
   isPublished: z.boolean(),
   sortOrder: sortOrderField,
+  field: z.enum(FIELD_OPTIONS),
   technologyIds: z.array(z.string()),
   gallery: z.array(
     z.object({

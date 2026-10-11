@@ -778,3 +778,274 @@ as a production site until Phase 10 is executed and verified:
 6. **Contact notifications — done; two follow-ups** — the feature is live and verified. Confirm the test email reached `mahmouddahy377@gmail.com`, then rotate the Resend key and the Supabase access token that were pasted into chat (see Known Issues). After that, no action is needed unless a domain is verified for Resend, in which case set `CONTACT_FROM_EMAIL` (§6 of `DEPLOYMENT.md`).
 
 Phases 6, 7, and 8 are complete and verified hermetically.
+
+---
+
+## CV Update — second CV for the ELV / Light Current track (October 10, 2026, complete and verified)
+
+The profile now supports two independent CVs. `profile.resume_path` remains the software/
+Flutter CV, unchanged; a new nullable `profile.resume_elv_path` column holds the ELV /
+Light Current CV. Both are uploaded, replaced and downloaded independently through the
+existing profile form and the existing hero download buttons (now labelled "Flutter CV"
+and "ELV CV"; each button appears only when its own file exists). The media library's
+usage tracking recognises both files, so neither is reported as an unreferenced orphan.
+
+Changes:
+- Migration `20261010162850_add_profile_elv_resume_path.sql` — additive, nullable column,
+  applied to the live project via Supabase MCP.
+- `src/types/database.ts` (`profile` Row/Insert/Update), `src/schemas/profile.ts`,
+  `src/pages/admin/ProfilePage.tsx` (second `FileUploadField`), `src/features/profile/Hero.tsx`,
+  `src/services/mediaUsage.ts` (ELV résumé reference in the files bucket), and the schema/
+  entity tests.
+
+Verification:
+- Live DB: `information_schema.columns` confirms `resume_elv_path text null` beside the
+  existing `resume_path`; RLS/grants are table-scoped, so no policy change was needed.
+- `npm run typecheck` — pass. `npm run lint` — pass. `npm run test` — 135 passed, 32 skipped.
+- `npm run build` — pass.
+- Supabase security advisor — no new findings; only the two pre-existing warnings
+  (`pg_net` extension in `public`, leaked-password protection disabled).
+
+Not done (out of scope for this task): the broader Software/ELV track selector, track-aware
+content, and separate ELV content described in `portfolio_evolution_plan.md`. This change
+adds only the second CV, consistent with the existing design and mechanism.
+
+---
+
+## Skills Update — Software / ELV field for skills and categories (October 10, 2026, complete and verified)
+
+Skills and skill categories now carry a `field` (`software` or `elv`). The admin Skills page
+assigns a field to each skill and category and filters the two tables by it; the category
+dropdown in the skill form lists only the categories of the chosen field. On the public home
+page a "Skills field" selector in the hero switches the Skills section between Software and
+ELV. The Flutter CV / ELV CV buttons and every other feature are untouched.
+
+This follows `portfolio_evolution_plan.md` §7 and §9 (Skills): field-specific categories, and
+a Software / ELV selection in the hero that focuses the skills shown.
+
+Changes:
+- Migration `20261010165417_skills_field.sql` — additive, non-destructive: `field text not
+  null default 'software'` plus a `check (field in ('software','elv'))` on both `skills` and
+  `skill_categories`, and an index on each. The default means every existing row keeps its
+  meaning (the current catalogue is software/Flutter); no row is rewritten and no column is
+  dropped. Applied to the live project via Supabase MCP.
+- `src/constants/fields.ts` (new) — `FIELD_OPTIONS`, `FieldOption`, `FIELD_LABELS`, mirroring
+  the CHECK; `src/utils/toFieldOption.ts` — the runtime narrowing, following `toThemeOption`.
+- `src/types/database.ts` (the `field` column), `src/types/entities.ts` (`Skill.field` and
+  `SkillCategory.field` narrowed to `FieldOption`), `src/schemas/skills.ts` (both schemas
+  require a field), `src/services/skills.ts` (narrows `field` on read and write).
+- `src/components/common/FieldSelector.tsx` (new) — the shared Software / ELV segmented
+  control, reusing the button-group pattern from the public projects filter.
+- Admin: `SkillsTable` and `SkillCategoriesTable` gained a field filter and a Field column;
+  `SkillDialog` and `SkillCategoryDialog` gained a Field select and default a new record to
+  the active filter. `SkillDialog` clears a category that no longer matches the chosen field.
+- Public: `Hero` shows the "Skills field" selector; `HomePage` owns the selection and passes
+  it to `SkillsPreview`, which lists only that field's published skills.
+
+Verification:
+- Live DB: `information_schema.columns` confirms `field text not null default 'software'` on
+  both tables; `pg_constraint` confirms both CHECKs. A self-cleaning `DO` block inserted an
+  ELV category and skill, confirmed an invalid field (`mechanical`) was rejected with a
+  `check_violation`, then deleted both rows. Counts unchanged afterwards: 7 skills, 4
+  categories, all still `software`, no test rows left.
+- `npm run verify` — pass: typecheck, lint, 150 tests (15 files, 18 new/updated tests
+  covering `toFieldOption`, the two schemas, the field-specific category filter, the form
+  defaulting, and the public preview filter), and build.
+- Supabase security advisor — no new findings; only the two pre-existing warnings.
+
+Decisions:
+- The column is named `field`, matching the task's wording and the existing `field_of_study`
+  convention; the values are `software` / `elv`.
+- The public **About** page skills section is left showing the full set, because the field
+  selector lives in the home hero and there is no selection to read on About. Making About
+  track-aware would need a shared/persisted selection, which is a later plan item, not this
+  one.
+- Technologies (the project filter catalogue) are unchanged: this task is about skills and
+  skill categories only.
+
+Not done (later plan items): field assignment for projects, experience, certificates, and
+services; a site-wide/persisted track selection; and the CV buttons following the selected
+field.
+
+---
+
+## Skills Update follow-up — field filter with an "All" option on About and the hero (October 10, 2026, complete and verified)
+
+The Skills field selector now offers an "All" option and, per the owner's request, is shown
+in both places that list skills: the About page skills section (grouped by category) and the
+home hero. Each page keeps its own selection; "All" lists every published skill, and picking
+Software or ELV narrows to that field. This supersedes the earlier decision to leave About
+unfiltered.
+
+Changes:
+- `src/constants/fields.ts` — added the filter-only value `ALL_FIELDS` (`'all'`), the ordered
+  `FIELD_FILTER_OPTIONS`, the `FieldFilter` type, and `FIELD_FILTER_LABELS`. `all` is a view
+  value only; it is never written to a row and cannot reach the database.
+- `src/components/common/FieldSelector.tsx` — added an `includeAll` mode, typed with overloads
+  so the admin tables (one field only) keep their `FieldOption` signature while the public
+  selectors use `FieldFilter`.
+- `src/features/skills/SkillsByCategory.tsx` — added `filterSkillsByField(skills, filter)`,
+  the single definition of what a field filter means, shared by the preview and About.
+- `src/pages/public/AboutPage.tsx` — the Skills section now owns its own field state (default
+  "All"), shows the selector, filters the list, and phrases the empty state per field.
+- `src/features/profile/Hero.tsx`, `src/pages/public/HomePage.tsx`,
+  `src/features/skills/SkillsPreview.tsx` — the hero selector gained "All" and the states are
+  typed `FieldFilter`; the home preview defaults to "All".
+
+Verification:
+- `npm run verify` — pass: typecheck, lint, 153 tests (15 files) and build. New/updated tests
+  cover the "All" preview case and `filterSkillsByField`.
+- No database change was needed: this is a presentation change over the existing `field`
+  column, and `all` is never sent to the database.
+
+Decisions:
+- "All" is a filter value, not a third field: adding it to `FIELD_OPTIONS` would have put an
+  illegal value in the admin forms and the schema. It lives only in the public filter type.
+- The two selectors are independent local state (hero for the home preview, About for the full
+  list). A single shared/persisted selection would be a later plan item, and duplicating a
+  small `<FieldSelector>` is simpler than lifting state across routes.
+- Default is "All" on both pages, so no published skill is hidden until the visitor narrows
+  the view.
+
+---
+
+## Skills Update — filter relocated to About only, empty fields hidden (October 10, 2026, complete and verified)
+
+Per the owner's follow-up, the field filter now lives only on the About page. It was removed
+from the home hero, the home preview shows every published skill again, and a field that has
+no skills is no longer offered: the ELV button appears only once at least one ELV skill
+exists, and vice versa for Software. This supersedes the "on About and the hero" decision
+above.
+
+Changes:
+- `src/features/profile/Hero.tsx`, `src/pages/public/HomePage.tsx` — reverted the hero to take
+  only `profile`; the field state and the selector are gone from the home page.
+- `src/features/skills/SkillsPreview.tsx` — shows all published skills again (no field prop);
+  it filters nothing now that the only selector is on About.
+- `src/pages/public/AboutPage.tsx` — builds its option list from the fields that actually have
+  a skill (`availableFields`) and hides the whole selector when none do; falls back to "All"
+  if the selected field disappears. The empty state still names the field.
+- `src/components/common/FieldSelector.tsx` — added an `options` prop so a caller can narrow
+  the list (About passes "All" + only the non-empty fields).
+- Removed `src/test/skillsPreview.test.tsx`, which tested the now-removed preview filtering.
+
+Verification:
+- `npm run verify` — pass: typecheck, lint, 150 tests (14 files) and build.
+- No database change: the `field` column and the "All" filter value are unchanged.
+
+Decisions:
+- A field with no skills is hidden rather than shown-and-empty, so the page never advertises
+  content the owner has not written.
+- The About selector stays because it is now the only place the full list is filtered; the
+  home preview intentionally shows everything.
+
+---
+
+## Projects — field assignment + field-based filter (replace technology filter) (October 11, 2026, complete and verified)
+
+Implemented the two-track (Software / ELV) model for Projects. Filtering is by `field`, not by
+technology. Technologies remain visible on project cards. A field with no projects is hidden
+entirely (no selector/button).
+
+Migration (applied via Supabase MCP, single-statement safe):
+- `supabase/migrations/20261010180000_projects_field.sql` — adds `projects.field` `text NOT NULL`
+  with `DEFAULT 'software'`, adds `CHECK (field in ('software','elv'))`, adds comment, and
+  creates `projects_field_idx` on `(field)`. Backward compatible: existing projects remain
+  `software`. Verified: column exists NOT NULL with default, CHECK allows only software/elv,
+  index exists, existing rows are `software`, an invalid value (`mechanical`) was rejected by
+  CHECK, and no data loss (test insert rolled back).
+
+Schema/types:
+- `src/types/database.ts` — `projects.Row/Insert/Update` include `field`.
+- `src/types/entities.ts` — `Project = Omit<Row<'projects'>, 'field'> & { field: FieldOption }`
+  (runtime narrowing).
+- `src/schemas/project.ts` — `field: z.enum(FIELD_OPTIONS)` added.
+- `src/utils/toFieldOption.ts` — narrows stored strings to `FieldOption` with fallback `'software'`
+  (unreachable while CHECK enforced).
+- `src/services/projects.ts` — narrows `field` via `toFieldOption` in `toProject`/`toProjectWithRelations`;
+  create/update return mapped `Project` objects.
+
+Admin UI:
+- `src/features/projects/ProjectDialog.tsx` — `EMPTY_PROJECT.field = 'software'`,
+  `projectToFormValues` includes `field`.
+- `src/features/projects/ProjectForm.tsx` — added Field `SelectField` (Software/ELV), fixed JSX
+  structure, and clarified technologies helper text to "Technologies used on this project."
+
+Public UI:
+- `src/features/projects/filter.ts` — new `filterProjectsByField(projects, filter: FieldFilter)`.
+- `src/features/projects/index.ts` — exports `filterProjectsByField`; removed `useTechnologyFilters`
+  from barrel.
+- `src/features/projects/hooks.ts` — removed `useTechnologyFilters` hook and `getTechnologyFilters`
+  import (filter is now local by field).
+- `src/pages/public/ProjectsPage.tsx` — replaced technology-based filtering with local field
+  filter (`useState<FieldFilter>(ALL_FIELDS)`), computes `availableFields` from projects that
+  exist for each `FieldOption`, builds `filterOptions = [ALL_FIELDS, ...availableFields]`, uses
+  `activeField = filterOptions.includes(field) ? field : ALL_FIELDS` fallback, hides selector
+  entirely when no field has projects, and renders field-aware empty title/description.
+  Technologies remain on `ProjectCard`. Removed URL `tech` param dependency and technology
+  chips.
+
+Tests:
+- `src/test/projectField.test.ts` — covers `filterProjectsByField` for 'all' and per-field cases,
+  and verifies `projectToFormValues` preserves `field` and `EMPTY_PROJECT.field = 'software'`.
+- Updated project fixtures in `src/test/live-admin-crud.test.ts`, `src/test/galleryErrors.test.tsx`,
+  `src/test/publishToggle.test.tsx`, and `src/test/admin-crud.test.ts` to include `field: 'software'`
+  so schema validation passes.
+- Removed `src/test/skillsPreview.test.tsx` (no longer applicable).
+
+Verification:
+- `npm run verify` — typecheck, lint, tests (154 passed / 32 skipped, 15 test files passed / 4
+  skipped of 19), build all green.
+- Migration applied and verified against live DB (column+CHECK+index present, existing data
+  unchanged, invalid values rejected).
+
+Decisions:
+- Filter by field (not technology) to match the two-track model and keep UI consistent with
+  Skills (About-only/Projects use same FieldSelector pattern). Technologies stay visible on cards
+  (informational), not as filter controls here.
+- Hide empty fields: if a field has no projects, its selector/button is not shown (and fallback
+  to 'all' guards against stale selection). Matches Skills empty-field hiding behavior.
+- `all` is never written to DB (filter-only). Field values are strictly `software|elv` (DB CHECK).
+- Admin always selects exactly one field; public can choose 'All' + non-empty fields via
+  `FieldSelector` with `options` + `includeAll` overloads.
+- Keep changes additive and minimal; no unrelated refactors.
+
+---
+
+## Experience & Certificates — field assignment + field-based filter (October 11, 2026, complete and verified)
+
+Extended the two-track (Software / ELV) model to Experience and Certificates. Filtering is by `field`. A field with no items is hidden entirely.
+
+Migrations (applied via Supabase MCP):
+- `supabase/migrations/20261011100000_experiences_field.sql` — adds `experiences.field` text NOT NULL default 'software', CHECK (`software`/`elv`), comment, `experiences_field_idx`.
+- `supabase/migrations/20261011100001_certificates_field.sql` — adds `certificates.field` text NOT NULL default 'software', CHECK (`software`/`elv`), comment, `certificates_field_idx`. Backward compatible; existing rows remain `software`.
+
+Schema/types:
+- `src/types/database.ts` — `experiences` and `certificates` Row/Insert/Update include `field`.
+- `src/types/entities.ts` — `Experience` and `Certificate` narrowed to `{ field: FieldOption }`.
+- `src/utils/toFieldOption.ts` (shared) used by services to narrow stored strings.
+- `src/schemas/experience.ts` — added `field: z.enum(FIELD_OPTIONS)`.
+- `src/schemas/certificate.ts` — added `field: z.enum(FIELD_OPTIONS)`.
+
+Admin UI:
+- `src/features/experience/ExperienceDialog.tsx` — `EMPTY_EXPERIENCE.field='software'`, `experienceToFormValues` includes `field`, added Field `SelectField`.
+- `src/features/certificates/CertificateDialog.tsx` — `EMPTY_CERTIFICATE.field='software'`, `certificateToFormValues` includes `field`, added Field `SelectField` in a grid layout.
+
+Services:
+- `src/services/experience.ts`, `src/services/certificates.ts` — narrow `field` via `toFieldOption` in mappers and return mapped objects for all reads/writes.
+
+Public UI:
+- `src/features/experience/filter.ts`, `src/features/experience/index.ts` — `filterExperiencesByField` + export.
+- `src/features/certificates/filter.ts`, `src/features/certificates/index.ts` — `filterCertificatesByField` + export.
+- `src/pages/public/ExperiencePage.tsx` — field filter with availableFields (hide empty), fallback to 'all', field-aware empty states.
+- `src/pages/public/CertificatesPage.tsx` — same field filter behavior.
+
+Tests:
+- `src/test/experienceField.test.ts`, `src/test/certificateField.test.ts` — filter + form defaults.
+- `src/test/schemas.test.ts` — updated certificate valid fixture to include `field`.
+
+Verification:
+- `npm run verify` — typecheck, lint, tests (162 passed / 32 skipped, 17 test files passed / 4 skipped), build green.
+
+Decisions:
+- Consistent with Projects/Skills: filter by field, hide empty fields, `all` filter-only, DB CHECK enforces allowed values. Technologies/info unchanged.

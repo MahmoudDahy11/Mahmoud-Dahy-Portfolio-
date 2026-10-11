@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { VALIDATION_LIMITS } from '@/constants/validation'
+import { FIELD_OPTIONS } from '@/constants/fields'
 import { optionalDate, optionalText, requiredText, sortOrderField } from './fields'
 
 /**
@@ -23,6 +24,7 @@ export const experienceSchema = z
     isCurrent: z.boolean(),
     sortOrder: sortOrderField,
     isPublished: z.boolean(),
+    field: z.enum(FIELD_OPTIONS),
   })
   .refine((values) => !values.isCurrent || !values.endDate, {
     message: 'A current role has no end date. Clear the end date, or turn off "current".',

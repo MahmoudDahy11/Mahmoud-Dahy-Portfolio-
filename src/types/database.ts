@@ -93,6 +93,7 @@ export type Database = {
           created_at: string
           credential_id: string | null
           credential_url: string | null
+          field: string
           id: string
           image_path: string | null
           is_published: boolean
@@ -106,6 +107,7 @@ export type Database = {
           created_at?: string
           credential_id?: string | null
           credential_url?: string | null
+          field?: string
           id?: string
           image_path?: string | null
           is_published?: boolean
@@ -119,6 +121,7 @@ export type Database = {
           created_at?: string
           credential_id?: string | null
           credential_url?: string | null
+          field?: string
           id?: string
           image_path?: string | null
           is_published?: boolean
@@ -221,6 +224,7 @@ export type Database = {
           description: string | null
           employment_type: string | null
           end_date: string | null
+          field: string
           id: string
           is_current: boolean
           is_published: boolean
@@ -236,6 +240,7 @@ export type Database = {
           description?: string | null
           employment_type?: string | null
           end_date?: string | null
+          field?: string
           id?: string
           is_current?: boolean
           is_published?: boolean
@@ -251,6 +256,7 @@ export type Database = {
           description?: string | null
           employment_type?: string | null
           end_date?: string | null
+          field?: string
           id?: string
           is_current?: boolean
           is_published?: boolean
@@ -319,6 +325,7 @@ export type Database = {
           id: string
           location: string | null
           phone: string | null
+          resume_elv_path: string | null
           resume_path: string | null
           short_bio: string | null
           updated_at: string
@@ -335,6 +342,7 @@ export type Database = {
           id?: string
           location?: string | null
           phone?: string | null
+          resume_elv_path?: string | null
           resume_path?: string | null
           short_bio?: string | null
           updated_at?: string
@@ -351,6 +359,7 @@ export type Database = {
           id?: string
           location?: string | null
           phone?: string | null
+          resume_elv_path?: string | null
           resume_path?: string | null
           short_bio?: string | null
           updated_at?: string
@@ -436,6 +445,7 @@ export type Database = {
           created_at: string
           description: string | null
           ended_at: string | null
+          field: string
           id: string
           is_featured: boolean
           is_published: boolean
@@ -455,6 +465,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           ended_at?: string | null
+          field?: string
           id?: string
           is_featured?: boolean
           is_published?: boolean
@@ -474,6 +485,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           ended_at?: string | null
+          field?: string
           id?: string
           is_featured?: boolean
           is_published?: boolean
@@ -564,6 +576,7 @@ export type Database = {
       skill_categories: {
         Row: {
           created_at: string
+          field: string
           id: string
           name: string
           slug: string
@@ -572,6 +585,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          field?: string
           id?: string
           name: string
           slug: string
@@ -580,6 +594,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          field?: string
           id?: string
           name?: string
           slug?: string
@@ -592,6 +607,7 @@ export type Database = {
         Row: {
           category_id: string | null
           created_at: string
+          field: string
           icon_path: string | null
           id: string
           is_published: boolean
@@ -603,6 +619,7 @@ export type Database = {
         Insert: {
           category_id?: string | null
           created_at?: string
+          field?: string
           icon_path?: string | null
           id?: string
           is_published?: boolean
@@ -614,6 +631,7 @@ export type Database = {
         Update: {
           category_id?: string | null
           created_at?: string
+          field?: string
           icon_path?: string | null
           id?: string
           is_published?: boolean

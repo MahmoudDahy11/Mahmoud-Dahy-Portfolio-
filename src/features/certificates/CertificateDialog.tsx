@@ -1,6 +1,7 @@
 import { EntityDialog } from '@/components/common/EntityDialog'
 import { SwitchField, TextField } from '@/components/common/FormField'
-import { NumberField } from '@/components/common/FormControls'
+import { NumberField, SelectField } from '@/components/common/FormControls'
+import { FIELD_SELECT_OPTIONS } from '@/constants/validation'
 import { ImageUploadField } from '@/components/common/ImageUploadField'
 import { MEDIA_FOLDERS } from '@/features/media'
 import { certificateSchema, type CertificateValues } from '@/schemas'
@@ -15,6 +16,7 @@ export const EMPTY_CERTIFICATE: CertificateValues = {
   imagePath: '',
   sortOrder: 0,
   isPublished: false,
+  field: 'software',
 }
 
 /** A stored certificate as the form wants it. See `ExperienceDialog` for the same rule. */
@@ -30,6 +32,7 @@ export function certificateToFormValues(certificate: Certificate | null): Certif
     imagePath: certificate.imagePath ?? '',
     sortOrder: certificate.sortOrder,
     isPublished: certificate.isPublished,
+    field: certificate.field,
   }
 }
 
@@ -96,7 +99,15 @@ export function CertificateDialog({
           description="Shown on the public certificates page."
         />
 
-        <NumberField name="sortOrder" label="Sort order" min={0} description="Lower appears first." />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <SelectField
+            name="field"
+            label="Field"
+            options={FIELD_SELECT_OPTIONS}
+            description="The Software or ELV track this certificate belongs to."
+          />
+          <NumberField name="sortOrder" label="Sort order" min={0} description="Lower appears first." />
+        </div>
 
         <SwitchField
           name="isPublished"

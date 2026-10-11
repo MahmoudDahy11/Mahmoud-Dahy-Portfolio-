@@ -21,7 +21,9 @@ const project: ProjectWithRelations = {
   isFeatured: false,
   isPublished: false,
   sortOrder: 0,
+  field: 'software',
   createdAt: '2026-10-06T14:41:38Z',
+  updatedAt: '2026-10-06T14:41:38Z',
   technologies: [],
   images: [],
 } as unknown as ProjectWithRelations

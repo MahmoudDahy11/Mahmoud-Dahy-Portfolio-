@@ -4,7 +4,9 @@ import { ImageLightbox, type LightboxImage } from '@/components/common/ImageLigh
 import { Container, Section } from '@/components/common/Section'
 import { SectionHeading } from '@/components/common/SectionHeading'
 import { QueryState } from '@/components/common/QueryState'
-import { useCertificates } from '@/features/certificates'
+import { FieldSelector } from '@/components/common/FieldSelector'
+import { useCertificates, filterCertificatesByField } from '@/features/certificates'
+import { FIELD_LABELS, FIELD_OPTIONS, ALL_FIELDS, type FieldFilter } from '@/constants/fields'
 import { usePageSeo } from '@/hooks/useSeo'
 import { imageUrl } from '@/services/mediaUrls'
 import { formatDate } from '@/utils/formatDate'
@@ -85,7 +87,16 @@ function CertificateCard({
 
 /** Published certificates, newest first. */
 export default function CertificatesPage() {
+  const [field, setField] = useState<FieldFilter>(ALL_FIELDS)
   const certificates = useCertificates()
+  const allCertificates = certificates.data ?? []
+
+  const availableFields = FIELD_OPTIONS.filter((option) =>
+    allCertificates.some((certificate) => certificate.field === option),
+  )
+  const filterOptions: FieldFilter[] = [ALL_FIELDS, ...availableFields]
+  const activeField = filterOptions.includes(field) ? field : ALL_FIELDS
+  const visibleCertificates = filterCertificatesByField(allCertificates, activeField)
   const [previewIndex, setPreviewIndex] = useState<number | null>(null)
 
   const certificateImages = useMemo<LightboxImage[]>(() => {
@@ -128,14 +139,39 @@ export default function CertificatesPage() {
           headingLevel="h1"
         />
 
+        {availableFields.length > 0 ? (
+          <div className="mb-6 space-y-2">
+            <FieldSelector
+              includeAll
+              options={filterOptions}
+              value={activeField}
+              onChange={setField}
+              ariaLabel="Filter certificates by field"
+            />
+            {activeField !== ALL_FIELDS ? (
+              <p className="text-muted-foreground text-sm">
+                Showing certificates in {FIELD_LABELS[activeField]}.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
         <QueryState
           isLoading={certificates.isLoading}
           isError={certificates.isError}
           error={certificates.error}
-          data={certificates.data}
+          data={visibleCertificates}
           skeletonRows={3}
-          emptyTitle="No certificates added yet"
-          emptyDescription="Certificates will appear here once they are published."
+          emptyTitle={
+            activeField === ALL_FIELDS
+              ? 'No certificates added yet'
+              : `No ${FIELD_LABELS[activeField]} certificates added yet`
+          }
+          emptyDescription={
+            activeField === ALL_FIELDS
+              ? 'Certificates will appear here once they are published.'
+              : `Certificates in ${FIELD_LABELS[activeField]} will appear here once they are published.`
+          }
           emptyIcon={BadgeCheck}
           onRetry={() => void certificates.refetch()}
         >

@@ -16,7 +16,8 @@ const PREVIEW_LIMIT = 12
  * Skills preview on the home page.
  *
  * A summary, not the full list: the About page holds the complete set. Fetching all of
- * them and slicing here would still transfer every row.
+ * them and slicing here would still transfer every row. The field filter lives on About,
+ * so this preview shows every published skill.
  */
 export function SkillsPreview() {
   const skills = useSkills()

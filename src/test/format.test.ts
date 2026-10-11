@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { formatBytes } from '@/utils/formatBytes'
 import { formatDate, formatDateRange } from '@/utils/formatDate'
 import { toThemeOption } from '@/utils/toThemeOption'
+import { toFieldOption } from '@/utils/toFieldOption'
 import { toStorageBucket } from '@/utils/toStorageBucket'
 
 describe('formatBytes', () => {
@@ -79,5 +80,20 @@ describe('toStorageBucket', () => {
     expect(toStorageBucket('portfolio-media')).toBe('portfolio-media')
     expect(toStorageBucket('something-else')).toBe('portfolio-media')
     expect(toStorageBucket(null)).toBe('portfolio-media')
+  })
+})
+
+describe('toFieldOption', () => {
+  it('passes through each value the database check constraint allows', () => {
+    expect(toFieldOption('software')).toBe('software')
+    expect(toFieldOption('elv')).toBe('elv')
+  })
+
+  it('falls back to software for a value it does not recognise', () => {
+    // Unreachable while the constraint exists, but a column extended without updating the
+    // app should degrade to a working page rather than an exception during render.
+    expect(toFieldOption('mechanical')).toBe('software')
+    expect(toFieldOption(null)).toBe('software')
+    expect(toFieldOption(undefined)).toBe('software')
   })
 })

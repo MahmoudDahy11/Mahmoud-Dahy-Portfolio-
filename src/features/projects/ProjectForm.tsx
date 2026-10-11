@@ -1,12 +1,18 @@
 import { useFormContext, useWatch } from 'react-hook-form'
 import { SwitchField, TextAreaField, TextField } from '@/components/common/FormField'
 import { SlugField } from '@/components/common/SlugField'
-import { NumberField } from '@/components/common/FormControls'
+import { NumberField, SelectField } from '@/components/common/FormControls'
 import { ImageUploadField } from '@/components/common/ImageUploadField'
 import { GalleryEditor } from '@/features/projects/ProjectGallery'
 import { MEDIA_FOLDERS } from '@/features/media'
+import { FIELD_LABELS, FIELD_OPTIONS } from '@/constants/fields'
 import type { ProjectValues } from '@/schemas'
 import type { Technology } from '@/types/entities'
+
+const FIELD_SELECT_OPTIONS = FIELD_OPTIONS.map((option) => ({
+  value: option,
+  label: FIELD_LABELS[option],
+}))
 
 /**
  * The project form's fields.
@@ -43,6 +49,12 @@ export function ProjectForm({ technologies }: { technologies: Technology[] }) {
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
+        <SelectField
+          name="field"
+          label="Field"
+          options={FIELD_SELECT_OPTIONS}
+          description="The Software or ELV track this project belongs to."
+        />
         <TextField
           name="repositoryUrl"
           label="Repository URL"
@@ -108,7 +120,7 @@ function TechnologyPicker({ technologies }: { technologies: Technology[] }) {
     <fieldset className="space-y-2">
       <legend className="text-sm font-medium">Technologies</legend>
       <p className="text-muted-foreground text-xs">
-        These become the filter chips on the public projects page.
+        Technologies used on this project.
       </p>
 
       <div className="grid gap-2 sm:grid-cols-2">

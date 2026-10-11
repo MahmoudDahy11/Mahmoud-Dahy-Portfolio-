@@ -1,5 +1,20 @@
 import { Badge } from '@/components/ui/badge'
+import type { FieldFilter } from '@/constants/fields'
 import type { SkillWithCategory } from './hooks'
+
+/**
+ * The skills that match a field filter: one field, or all of them.
+ *
+ * Shared by the home preview and the About page so "All" and a single field mean the same
+ * thing in both. Selecting a field only hides the others; the rows themselves are unchanged.
+ */
+export function filterSkillsByField(
+  skills: SkillWithCategory[],
+  field: FieldFilter,
+): SkillWithCategory[] {
+  if (field === 'all') return skills
+  return skills.filter((skill) => skill.field === field)
+}
 
 /** A skill name. */
 export function SkillItem({ skill }: { skill: SkillWithCategory }) {

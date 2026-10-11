@@ -1,10 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Column } from '@/components/common/DataTable'
 import { DataTable, TableEmptyAction } from '@/components/common/DataTable'
+import { FieldSelector } from '@/components/common/FieldSelector'
 import { PublishBadge } from '@/components/common/PublishBadge'
 import { RowActions } from '@/components/common/RowActions'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { Button } from '@/components/ui/button'
+import { FIELD_LABELS, type FieldOption } from '@/constants/fields'
 import { useCrudDialogs } from '@/hooks/useCrudDialogs'
 import { useAllSkills, useSkillCategories, useSkillMutations } from '@/features/skills/hooks'
 import { SkillDialog } from '@/features/skills/SkillDialog'
@@ -25,13 +27,27 @@ export function SkillsTable() {
   const dialogs = useCrudDialogs<SkillWithCategory>()
   const { create, update, remove, isPending } = useSkillMutations()
 
-  const rows = useMemo(() => skills.data ?? [], [skills.data])
+  // The table shows one field at a time. The filter is local state because it is a view of
+  // the list already loaded, not a second query.
+  const [field, setField] = useState<FieldOption>('software')
+
+  const rows = useMemo(
+    () => (skills.data ?? []).filter((skill) => skill.field === field),
+    [skills.data, field],
+  )
 
   const columns: Column<SkillWithCategory>[] = [
     {
       id: 'name',
       header: 'Skill',
       cell: ({ row }) => <p className="truncate font-medium">{row.original.name}</p>,
+    },
+    {
+      id: 'field',
+      header: 'Field',
+      cell: ({ row }) => (
+        <span className="text-muted-foreground text-sm">{FIELD_LABELS[row.original.field]}</span>
+      ),
     },
     {
       id: 'category',
@@ -74,6 +90,13 @@ export function SkillsTable() {
 
   return (
     <>
+      <FieldSelector
+        value={field}
+        onChange={setField}
+        ariaLabel="Filter skills by field"
+        className="mb-4"
+      />
+
       <DataTable
         columns={columns}
         data={rows}
@@ -82,10 +105,10 @@ export function SkillsTable() {
         isLoading={skills.isPending}
         error={skills.error}
         onRetry={() => void skills.refetch()}
-        emptyTitle="No skills yet"
+        emptyTitle={`No ${FIELD_LABELS[field]} skills yet`}
         emptyDescription="Add the technologies you work with. Each stays a draft until published."
         emptyAction={<TableEmptyAction onClick={dialogs.openCreate} label="Add a skill" />}
-        hideBelow={{ proficiency: 'md', status: 'sm' }}
+        hideBelow={{ field: 'sm', proficiency: 'md', status: 'sm' }}
       />
 
       <div className="mt-4">
@@ -104,6 +127,7 @@ export function SkillsTable() {
         }}
         skill={dialogs.editing}
         categories={categories.data ?? []}
+        defaultField={field}
         isSubmitting={isPending}
         onSubmit={async (values) => {
           if (dialogs.editing) {
