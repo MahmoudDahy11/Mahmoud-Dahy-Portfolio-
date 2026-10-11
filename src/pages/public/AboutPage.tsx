@@ -29,6 +29,9 @@ export default function AboutPage() {
   // until the visitor narrows it down.
   const [field, setField] = useState<FieldFilter>('all')
   const profileImage = imageUrl(profile.data?.coverPath)
+  // Shown as the figure credit when the cover is present, and inline in the text
+  // when it is not, so the contact line exists exactly once in either state.
+  const contactLine = [profile.data?.location, profile.data?.email].filter(Boolean).join(' · ')
 
   const allSkills = skills.data ?? []
 
@@ -77,7 +80,7 @@ export default function AboutPage() {
           ) : null}
 
           {profile.data ? (
-            <div className="grid gap-8 sm:grid-cols-[1fr_auto] sm:items-start">
+            <div className="grid gap-12 md:grid-cols-[1.15fr_0.85fr] md:items-start md:gap-20">
               <ProseContainer className="space-y-4">
                 {profile.data.bio ? (
                   <p className="text-muted-foreground whitespace-pre-line">{profile.data.bio}</p>
@@ -87,27 +90,50 @@ export default function AboutPage() {
                   <p className="text-muted-foreground">No bio has been written yet.</p>
                 )}
 
-                {profile.data.location || profile.data.email ? (
-                  <p className="text-muted-foreground text-sm">
-                    {[profile.data.location, profile.data.email].filter(Boolean).join(' · ')}
-                  </p>
+                {!profileImage && contactLine ? (
+                  <p className="text-muted-foreground text-sm">{contactLine}</p>
                 ) : null}
               </ProseContainer>
 
               {profileImage ? (
-                <>
+                <figure className="mx-auto w-full max-w-72 sm:max-w-80 md:mx-0 md:-mt-6 md:max-w-[320px] md:justify-self-end">
+                  {/*
+                    Same portrait 4/5 crop as the hero and the same folio language,
+                    numbered 02 so the two figures read as one series. The telling
+                    apart is in the details: top-aligned here against the hero's
+                    offset portrait, and the contact line as its caption.
+                  */}
+                  <div aria-hidden="true" className="mb-3 flex items-center gap-3">
+                    <span className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                      Profile
+                    </span>
+                    <span className="h-px flex-1 bg-border" />
+                    <span className="text-[11px] font-semibold tracking-[0.18em] text-primary">
+                      02
+                    </span>
+                  </div>
+
                   <button
                     type="button"
-                    className="group mx-auto aspect-square w-full max-w-64 rounded-full focus-visible:outline-ring"
+                    className="group block w-full rounded-[4px] focus-visible:outline-ring"
                     onClick={() => setIsProfileImagePreviewOpen(true)}
                     aria-label={`Preview ${profile.data.fullName || 'profile'} image`}
                   >
                     <img
                       src={profileImage}
                       alt=""
-                      className="border-border h-full w-full rounded-full border object-cover transition duration-(--motion-duration) group-hover:brightness-95"
+                      className="aspect-[4/5] w-full rounded-[4px] border border-border object-cover object-top transition duration-(--motion-duration) group-hover:brightness-95"
                     />
                   </button>
+
+                  {contactLine ? (
+                    <figcaption className="mt-3 flex items-start gap-3 border-t border-border pt-3">
+                      <span aria-hidden="true" className="mt-[7px] h-px w-6 shrink-0 bg-primary" />
+                      <span className="text-xs leading-relaxed text-muted-foreground">
+                        {contactLine}
+                      </span>
+                    </figcaption>
+                  ) : null}
 
                   <ImageLightbox
                     images={[
@@ -121,7 +147,7 @@ export default function AboutPage() {
                     onChange={() => {}}
                     onClose={() => setIsProfileImagePreviewOpen(false)}
                   />
-                </>
+                </figure>
               ) : null}
             </div>
           ) : null}

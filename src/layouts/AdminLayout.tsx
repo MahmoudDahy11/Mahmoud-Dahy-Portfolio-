@@ -66,7 +66,7 @@ export function AdminLayout() {
   useNoIndex()
 
   return (
-    <div className="bg-muted/40 flex min-h-screen">
+    <div className="editorial bg-muted/40 flex min-h-screen">
       <a
         href="#admin-content"
         className="bg-background focus:ring-ring sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:px-4 focus:py-2 focus:ring-2"

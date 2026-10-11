@@ -14,6 +14,11 @@ panels). Root cause was `VARIANT_CLASSES` in `src/components/ui/link-button.tsx`
 the default variant's `bg-primary`, which `tailwind-merge` keeps whenever the chosen variant
 declares no background. Removed the prepend (the only change); verified with headless
 Chromium computed styles plus screenshots in both themes, then re-ran the full suite green.
+
+Light background refresh (same session): public light theme background `#F7F3EB` → warm
+cream `#FAF7F0`, secondary/muted `#EFE9DF` → `#F5F0E7`. No other token touched; dark mode
+and admin theme unchanged. Lint and build clean, new values confirmed in built CSS.
+Creamier pass: background → `#FBF4E8`, secondary/muted → `#F4ECDC`, same scope.
 Previous state below is unchanged.
 
 Last updated: October 7, 2026 — contact-form email notifications, complete and verified end

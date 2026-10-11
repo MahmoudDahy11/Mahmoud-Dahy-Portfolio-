@@ -9,7 +9,7 @@ import { Logo } from '@/components/common/Navigation'
  */
 export function AuthLayout() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-12">
+    <div className="editorial bg-background text-foreground flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-12">
       <Logo />
       <div className="w-full max-w-sm">
         <Outlet />

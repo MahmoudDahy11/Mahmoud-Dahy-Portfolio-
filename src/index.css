@@ -262,20 +262,21 @@
 }
 
 /*
- * Editorial theme (public site only).
+ * Editorial theme (public site and admin dashboard).
  *
- * The tokens above stay untouched so the Admin Dashboard keeps its exact appearance.
- * `PublicLayout` adds the `editorial` class to its root, and everything below only
- * applies inside it. Same token names, different values — no component changes needed.
+ * The base tokens above remain the fallback for anything rendered outside a themed
+ * layout. Both `PublicLayout` and `AdminLayout` (plus `AuthLayout` for sign-in) add
+ * the `editorial` class to their root, and everything below only applies inside it.
+ * Same token names, different values — no component changes needed.
  *
- * Palette (light): warm ivory #F7F3EB, surface #FFFDFA, ink #171717,
- * secondary #69645F, burnt orange #F06423, hairlines #E7E0D6, muted #EFE9DF.
+ * Palette (light): light creamy #FBF4E8, surface #FFFDFA, ink #171717,
+ * secondary #69645F, burnt orange #F06423, hairlines #E7E0D6, muted #F4ECDC.
  * Dark palette: deep charcoal #141414, secondary #1B1B1B, card #1D1D1D,
  * warm off-white #F1EEE8, muted warm gray #AAA49B, borders #353535,
  * same brand orange #F06423 reserved for actions and accents.
  */
 .editorial {
-  --background: #f7f3eb;
+  --background: #fbf4e8;
   --foreground: #171717;
 
   --card: #fffdfa;
@@ -287,10 +288,10 @@
   --primary: #f06423;
   --primary-foreground: #221206;
 
-  --secondary: #efe9df;
+  --secondary: #f4ecdc;
   --secondary-foreground: #2e2b27;
 
-  --muted: #efe9df;
+  --muted: #f4ecdc;
   --muted-foreground: #69645f;
 
   --accent: #f9e3d3;
@@ -299,6 +300,15 @@
   --border: #e7e0d6;
   --input: #e7e0d6;
   --ring: #f06423;
+
+  --sidebar: #fffdfa;
+  --sidebar-foreground: #171717;
+  --sidebar-primary: #f06423;
+  --sidebar-primary-foreground: #221206;
+  --sidebar-accent: #f4ecdc;
+  --sidebar-accent-foreground: #2e2b27;
+  --sidebar-border: #e7e0d6;
+  --sidebar-ring: #f06423;
 }
 
 .dark .editorial {
@@ -331,6 +341,15 @@
   --border: #353535;
   --input: #353535;
   --ring: #f06423;
+
+  --sidebar: #1b1b1b;
+  --sidebar-foreground: #f1eee8;
+  --sidebar-primary: #f06423;
+  --sidebar-primary-foreground: #221206;
+  --sidebar-accent: #222222;
+  --sidebar-accent-foreground: #f1eee8;
+  --sidebar-border: #353535;
+  --sidebar-ring: #f06423;
 }
 
 /* Editorial headings use the serif display stack; body and technical text stay sans. */
