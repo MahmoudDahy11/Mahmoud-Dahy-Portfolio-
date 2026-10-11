@@ -1,5 +1,21 @@
 # PROJECT_STATUS.md
 
+Last updated: October 11, 2026 — design refinement pass (light preserved, dark redesigned),
+implemented and verified. Light theme keeps its exact palette with a recomposed hero (no
+decorative shapes or framing, quiet text links for contact/CV actions), a lead-feature
+project layout, and de-carded Services/Certificates/Contact/CTA sections. Dark theme is a
+new intentional palette (charcoal #141414, section #1B1B1B, card #1D1D1D, off-white #F1EEE8,
+warm gray #AAA49B, borders #353535, same brand orange). Gate run today: `npm run verify`
+green (162 hermetic tests passed, 32 live-gated skipped; typecheck, lint, build clean).
+
+Button-label fix (same session): `variant="link"`/`"ghost"` link-buttons rendered orange
+text on an unintended orange background (empty colored rectangles in the hero and track
+panels). Root cause was `VARIANT_CLASSES` in `src/components/ui/link-button.tsx` prepending
+the default variant's `bg-primary`, which `tailwind-merge` keeps whenever the chosen variant
+declares no background. Removed the prepend (the only change); verified with headless
+Chromium computed styles plus screenshots in both themes, then re-ran the full suite green.
+Previous state below is unchanged.
+
 Last updated: October 7, 2026 — contact-form email notifications, complete and verified end
 to end. A visitor's message is stored and emailed to the owner: an `AFTER INSERT` trigger
 queues a call to the `contact-notify` Edge Function with pg_net, and that function reads the

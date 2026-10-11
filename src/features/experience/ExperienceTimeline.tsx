@@ -5,7 +5,7 @@ import type { Experience } from '@/types/entities'
 /** One role in the employment timeline. */
 export function ExperienceItem({ experience }: { experience: Experience }) {
   return (
-    <li className="border-l-2 pl-4">
+    <li className="border-l-2 border-primary/50 pl-4">
       <p className="text-muted-foreground text-sm">
         {formatDateRange(experience.startDate, experience.endDate)}
         {/*

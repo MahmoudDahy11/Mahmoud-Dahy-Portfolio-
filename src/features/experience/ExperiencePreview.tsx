@@ -49,7 +49,7 @@ export function ExperiencePreview() {
           {(data) => (
             <ol className="space-y-6">
               {data.slice(0, PREVIEW_LIMIT).map((experience) => (
-                <li key={experience.id} className="border-l-2 pl-4">
+                <li key={experience.id} className="border-l-2 border-primary/50 pl-4">
                   <p className="text-muted-foreground text-sm">
                     {formatDateRange(experience.startDate, experience.endDate)}
                     {experience.isCurrent ? ' — Present' : ''}

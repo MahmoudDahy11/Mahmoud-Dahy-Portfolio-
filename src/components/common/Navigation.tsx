@@ -29,8 +29,10 @@ export function Logo({ name = 'Portfolio' }: { name?: string }) {
 
 function navLinkClass(isActive: boolean) {
   return [
-    'rounded-md px-3 py-2 text-sm font-medium transition-colors',
-    isActive ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+    'relative rounded-md px-3 py-2 text-sm font-medium transition-colors',
+    isActive
+      ? 'text-foreground after:absolute after:inset-x-3 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-primary after:content-[""]'
+      : 'text-muted-foreground hover:text-foreground hover:bg-muted',
   ].join(' ')
 }
 

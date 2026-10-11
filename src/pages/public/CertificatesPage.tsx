@@ -33,11 +33,11 @@ function CertificateCard({
   const issued = formatDate(certificate.issuedOn, { year: 'numeric', month: 'long' })
 
   return (
-    <article className="border-border flex flex-col gap-3 rounded-lg border p-5">
+    <article className="flex flex-col gap-4 border-b border-border py-7 first:border-t sm:flex-row sm:gap-6">
       {image && previewIndex !== null ? (
         <button
           type="button"
-          className="group rounded text-left focus-visible:outline-ring"
+          className="group w-full shrink-0 rounded text-left focus-visible:outline-ring sm:w-44"
           onClick={() => onPreview(previewIndex)}
           aria-label={`Preview ${certificate.title} certificate`}
         >
@@ -51,7 +51,7 @@ function CertificateCard({
       ) : null}
 
       <div className="space-y-1">
-        <h2 className="flex items-start gap-2 font-semibold tracking-tight">
+        <h2 className="flex items-start gap-2 text-lg font-semibold tracking-tight">
           <BadgeCheck className="text-primary mt-0.5 size-5 shrink-0" aria-hidden="true" />
           {certificate.title}
         </h2>
@@ -67,20 +67,20 @@ function CertificateCard({
             Credential ID: {certificate.credentialId}
           </p>
         ) : null}
-      </div>
 
-      {certificate.credentialUrl ? (
-        <a
-          href={certificate.credentialUrl}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="text-primary inline-flex items-center gap-1.5 text-sm font-medium hover:underline"
-        >
-          Verify credential
-          <ExternalLink className="size-3.5" aria-hidden="true" />
-          <span className="sr-only">(opens in a new tab)</span>
-        </a>
-      ) : null}
+        {certificate.credentialUrl ? (
+          <a
+            href={certificate.credentialUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="text-primary inline-flex items-center gap-1.5 pt-1 text-sm font-medium hover:underline"
+          >
+            Verify credential
+            <ExternalLink className="size-3.5" aria-hidden="true" />
+            <span className="sr-only">(opens in a new tab)</span>
+          </a>
+        ) : null}
+      </div>
     </article>
   )
 }
@@ -176,7 +176,7 @@ export default function CertificatesPage() {
           onRetry={() => void certificates.refetch()}
         >
           {(data) => (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
               {data.map((certificate) => (
                 <CertificateCard
                   key={certificate.id}

@@ -20,8 +20,6 @@ import { destinationFor } from '@/lib/destination'
  * filtering the project list, submitting a form, opening a dialog.
  */
 
-const VARIANT_CLASSES = buttonVariants()
-
 type CommonProps = {
   variant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'link'
   size?: 'default' | 'xs' | 'sm' | 'lg' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg'
@@ -38,7 +36,7 @@ export function LinkButton({
   children,
 }: CommonProps & { to: string }) {
   return (
-    <Link to={to} className={cn(VARIANT_CLASSES, buttonVariants({ variant, size }), className)}>
+    <Link to={to} className={cn(buttonVariants({ variant, size }), className)}>
       {children}
     </Link>
   )
@@ -64,7 +62,7 @@ export function ExternalLinkButton({
       href={href}
       target="_blank"
       rel="noreferrer noopener"
-      className={cn(VARIANT_CLASSES, buttonVariants({ variant, size }), className)}
+      className={cn(buttonVariants({ variant, size }), className)}
     >
       {children}
       <span className="sr-only"> (opens in a new tab)</span>

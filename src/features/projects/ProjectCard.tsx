@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowUpRight, CodeXml } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { FIELD_LABELS } from '@/constants/fields'
 import { projectDetailPath } from '@/constants/routes'
 import { imageUrl } from '@/services/mediaUrls'
 import type { ProjectWithRelations } from '@/types/entities'
@@ -11,8 +12,17 @@ import type { ProjectWithRelations } from '@/types/entities'
  * The whole card is a single link. Overlaying a second link on top would create two
  * tab stops for one destination and confuse a screen reader, so the external links inside
  * are the only nested interactive elements and they sit visibly apart from the card link.
+ *
+ * `layout` only changes presentation: "horizontal" spreads one card across two columns
+ * so a featured section can lead with a larger composition instead of identical cards.
  */
-export function ProjectCard({ project }: { project: ProjectWithRelations }) {
+export function ProjectCard({
+  project,
+  layout = 'vertical',
+}: {
+  project: ProjectWithRelations
+  layout?: 'vertical' | 'horizontal'
+}) {
   const cover = imageUrl(project.coverImagePath)
   // Already sorted by the service; copied before sorting so the array in the query cache
   // is not reordered in place.
@@ -21,13 +31,25 @@ export function ProjectCard({ project }: { project: ProjectWithRelations }) {
   )
 
   return (
-    <article className="border-border group relative flex h-full flex-col overflow-hidden rounded-lg border transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-primary/50">
-      <div className="bg-muted relative aspect-video overflow-hidden">
+    <article
+      className={
+        layout === 'horizontal'
+          ? 'border-border bg-card group relative grid h-full overflow-hidden rounded-lg border transition-[transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-primary/40 sm:grid-cols-[1.15fr_1fr]'
+          : 'border-border bg-card group relative flex h-full flex-col overflow-hidden rounded-lg border transition-[transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-primary/40'
+      }
+    >
+      <div
+        className={
+          layout === 'horizontal'
+            ? 'bg-muted relative aspect-[16/10] overflow-hidden sm:aspect-auto sm:min-h-72'
+            : 'bg-muted relative aspect-[16/10] overflow-hidden'
+        }
+      >
         {cover ? (
           <img
             src={cover}
             alt={`${project.title} cover`}
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
             loading="lazy"
           />
         ) : (
@@ -37,20 +59,32 @@ export function ProjectCard({ project }: { project: ProjectWithRelations }) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="text-lg font-semibold tracking-tight">
-            <Link
-              to={projectDetailPath(project.slug)}
-              className="after:absolute after:inset-0 after:content-['']"
-            >
-              {project.title}
-            </Link>
-          </h3>
+      <div className="flex flex-1 flex-col gap-2.5 p-6 sm:p-7">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold tracking-[0.16em] text-primary uppercase">
+            {FIELD_LABELS[project.field]}
+          </p>
           {project.isFeatured ? <Badge>Featured</Badge> : null}
         </div>
 
-        {project.summary ? <p className="text-muted-foreground text-sm">{project.summary}</p> : null}
+        <h3
+          className={
+            layout === 'horizontal'
+              ? 'font-display text-2xl leading-snug font-semibold tracking-tight'
+              : 'font-display text-xl leading-snug font-semibold tracking-tight'
+          }
+        >
+          <Link
+            to={projectDetailPath(project.slug)}
+            className="after:absolute after:inset-0 after:content-[''] decoration-primary decoration-2 underline-offset-4 group-hover:underline"
+          >
+            {project.title}
+          </Link>
+        </h3>
+
+        {project.summary ? (
+          <p className="text-muted-foreground text-sm leading-relaxed">{project.summary}</p>
+        ) : null}
 
         {technologies.length > 0 ? (
           <ul className="mt-auto flex flex-wrap gap-1.5 pt-2" aria-label="Technologies used">

@@ -38,28 +38,43 @@ export default function ServicesPage() {
           onRetry={() => void services.refetch()}
         >
           {(data) => (
-            <div className="grid gap-6 sm:grid-cols-2">
-              {data.map((service) => (
-                <article key={service.id} className="border-border flex flex-col gap-3 rounded-lg border p-6">
-                  <div className="flex items-start gap-3">
-                    {service.iconPath ? (
-                      <img
-                        src={imageUrl(service.iconPath) ?? undefined}
-                        alt=""
-                        className="size-10 shrink-0 object-contain"
-                        loading="lazy"
-                      />
+            <div className="border-t border-border">
+              {data.map((service, index) => (
+                <article
+                  key={service.id}
+                  className="grid gap-4 border-b border-border py-7 sm:grid-cols-[2rem_1fr] sm:gap-6"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="font-display hidden text-lg text-muted-foreground sm:block"
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      {service.iconPath ? (
+                        <img
+                          src={imageUrl(service.iconPath) ?? undefined}
+                          alt=""
+                          className="size-8 shrink-0 object-contain"
+                          loading="lazy"
+                        />
+                      ) : null}
+
+                      <h2 className="text-lg font-semibold tracking-tight">
+                        {service.title}
+                      </h2>
+                    </div>
+
+                    {service.priceHint ? (
+                      <p className="text-sm font-medium text-primary">{service.priceHint}</p>
                     ) : null}
 
-                    <div className="space-y-1">
-                      <h2 className="text-lg font-semibold tracking-tight">{service.title}</h2>
-                      {service.priceHint ? (
-                        <p className="text-muted-foreground text-sm">{service.priceHint}</p>
-                      ) : null}
-                    </div>
+                    <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed whitespace-pre-line">
+                      {service.description}
+                    </p>
                   </div>
-
-                  <p className="text-muted-foreground text-sm whitespace-pre-line">{service.description}</p>
                 </article>
               ))}
             </div>

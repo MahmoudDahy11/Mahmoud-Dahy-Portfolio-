@@ -154,6 +154,7 @@
   --animate-fade-rise: fade-rise var(--motion-duration-slow) var(--motion-ease) both;
   --animate-fade-in: fade-in var(--motion-duration) var(--motion-ease) both;
   --font-heading: var(--font-sans);
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -258,4 +259,87 @@
     margin-inline: auto;
     max-width: 48rem;
   }
+}
+
+/*
+ * Editorial theme (public site only).
+ *
+ * The tokens above stay untouched so the Admin Dashboard keeps its exact appearance.
+ * `PublicLayout` adds the `editorial` class to its root, and everything below only
+ * applies inside it. Same token names, different values — no component changes needed.
+ *
+ * Palette (light): warm ivory #F7F3EB, surface #FFFDFA, ink #171717,
+ * secondary #69645F, burnt orange #F06423, hairlines #E7E0D6, muted #EFE9DF.
+ * Dark palette: deep charcoal #141414, secondary #1B1B1B, card #1D1D1D,
+ * warm off-white #F1EEE8, muted warm gray #AAA49B, borders #353535,
+ * same brand orange #F06423 reserved for actions and accents.
+ */
+.editorial {
+  --background: #f7f3eb;
+  --foreground: #171717;
+
+  --card: #fffdfa;
+  --card-foreground: #171717;
+
+  --popover: #fffdfa;
+  --popover-foreground: #171717;
+
+  --primary: #f06423;
+  --primary-foreground: #221206;
+
+  --secondary: #efe9df;
+  --secondary-foreground: #2e2b27;
+
+  --muted: #efe9df;
+  --muted-foreground: #69645f;
+
+  --accent: #f9e3d3;
+  --accent-foreground: #8f3a10;
+
+  --border: #e7e0d6;
+  --input: #e7e0d6;
+  --ring: #f06423;
+}
+
+.dark .editorial {
+  /*
+   * Intentionally designed dark theme, not an inverted light theme. Tonal steps are
+   * small (page 141414 → section 1B1B1B → card 1D1D1D) so hierarchy reads without
+   * glowing cards; orange appears only on actions, links, and small accents.
+   */
+  --background: #141414;
+  --foreground: #f1eee8;
+
+  --card: #1d1d1d;
+  --card-foreground: #f1eee8;
+
+  --popover: #222222;
+  --popover-foreground: #f1eee8;
+
+  --primary: #f06423;
+  --primary-foreground: #221206;
+
+  --secondary: #1b1b1b;
+  --secondary-foreground: #e8e2d6;
+
+  --muted: #1b1b1b;
+  --muted-foreground: #aaa49b;
+
+  --accent: #2a1e14;
+  --accent-foreground: #e8b98f;
+
+  --border: #353535;
+  --input: #353535;
+  --ring: #f06423;
+}
+
+/* Editorial headings use the serif display stack; body and technical text stay sans. */
+.editorial :is(h1, h2) {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.editorial ::selection {
+  background: color-mix(in oklch, var(--primary) 28%, transparent);
 }

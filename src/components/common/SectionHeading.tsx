@@ -35,6 +35,8 @@ export function SectionHeading({
         className,
       )}
     >
+      {/* Decorative kicker bar. Purely visual, hidden from assistive technology. */}
+      <span aria-hidden="true" className="bg-primary mb-1 block h-[3px] w-10 rounded-full" />
       <Heading id={id} className="text-2xl font-semibold tracking-tight sm:text-3xl">
         {title}
       </Heading>

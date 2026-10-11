@@ -10,6 +10,7 @@ import { PUBLIC_ROUTES } from '@/constants/routes'
 import { ContactCta } from '@/features/contact'
 import { ExperiencePreview } from '@/features/experience'
 import { Hero, useProfile } from '@/features/profile'
+import { TrackPanels } from '@/features/profile/TrackPanels'
 import { ProjectCard, useProjects } from '@/features/projects'
 import { SkillsPreview } from '@/features/skills'
 import { usePageSeo } from '@/hooks/useSeo'
@@ -81,6 +82,8 @@ export default function HomePage() {
 
       {profile.data ? <Hero profile={profile.data} /> : null}
 
+      <TrackPanels />
+
       {/*
         Only projects the owner has flagged as featured appear here. When none are flagged
         the section shows its empty state, which points at the full projects page rather
@@ -121,10 +124,19 @@ export default function HomePage() {
             onRetry={() => void featured.refetch()}
           >
             {(projects) => (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {projects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
+              <div className="grid gap-6 lg:grid-cols-2">
+                {projects.map((project, index) =>
+                  // The lead project gets a wide horizontal composition; the rest stay
+                  // compact. Index-based only — filtering, links, and visibility are
+                  // unchanged.
+                  index === 0 ? (
+                    <div key={project.id} className="lg:col-span-2">
+                      <ProjectCard project={project} layout="horizontal" />
+                    </div>
+                  ) : (
+                    <ProjectCard key={project.id} project={project} />
+                  ),
+                )}
               </div>
             )}
           </QueryState>

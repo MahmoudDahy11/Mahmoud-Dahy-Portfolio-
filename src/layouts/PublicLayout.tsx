@@ -19,7 +19,7 @@ export function PublicLayout() {
   const siteName = settings.data?.siteTitle?.trim() || 'Portfolio'
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="editorial flex min-h-screen flex-col">
       {/*
         Skip link. Hidden until focused, which is how keyboard users bypass the
         navigation and reach the content directly.
